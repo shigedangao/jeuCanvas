@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/font-awesome.min.css">
   </head>
-  <body>
+  <body id='body'>
     <canvas width="500" height="500" id="canvas"></canvas>
     <!-- stuff = 100% in height and width -->
     <div class="loginWrapper">
@@ -28,13 +29,17 @@
     <div class="subscribeWrapper">
       <div class="subscribe">
         <div id="upper">
+          <div id="topbar"><p></p></div>
           <p>Sign Up</p>
         </div>
         <form>
-          <input type="text" name="login" placeholder="Liu jie">
-          <input type="text" name="password" placeholder="******">
-          <input type="text" name="mail" placeholder="Liujie@gmail.com">
-          <button>Subscribe</button>
+          <input type="text" name="login" placeholder="Liu jie" class="inputSub">
+          <input type="text" name="password" placeholder="******" class="inputSub">
+          <input type="text" name="mail" placeholder="Liujie@gmail.com" class="inputSub">
+          <div class="flex">
+            <button id='subscribe'>Subscribe</button>
+            <button id="back">Go Back</button>
+          </div>
         </form>
       </div>
     </div>

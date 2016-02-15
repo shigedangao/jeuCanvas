@@ -4,6 +4,10 @@ body{
   font-family: 'helvetica';
   font-weight: lighter;
   overflow: hidden;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+  -ms-transition: all ease .5s;
 }
 
 .loginWrapper, .subscribeWrapper{
@@ -46,13 +50,14 @@ body{
   background-color: rgba(37,50,56,1);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+  position: relative;
 }
 
 #upper p{
   color: white;
   text-align: center;
   font-size: 2em;
-  padding-top: 80px;
+  padding-top: 30px;
 }
 
 img{
@@ -101,6 +106,10 @@ button{
   border-color: transparent;
   background-color: #253238;
   color: white;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+  -ms-transition: all ease .5s;
 }
 
 canvas{
@@ -120,4 +129,52 @@ canvas{
 
 #sign:hover{
   text-decoration: underline;
+}
+
+.toDown{
+  transform: translateY(-105vh);
+  -webkit-transform: translateY(-105vh);
+  -moz-transform: translateY(-105vh);
+  -ms-transform: translateY(-105vh);
+}
+
+.toUp{
+  transform: translateY(0);
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
+  -ms-transform: translateY(0);
+}
+
+#arr{
+  width: 30px;
+  height: 30px;
+  background-color: #F8F8F8;
+  border-radius: 50%;
+  position: absolute;
+  right: 100px;
+  bottom: 100px;
+}
+
+.flex{
+  display: flex;
+}
+
+button:hover{
+  background-color: #586478;
+}
+
+#topbar{
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  min-height: 50px;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+  -ms-transition: all ease .5s;
+}
+
+#topbar p{
+  padding-top: 15px;
+  font-size: 15px;
+  padding-bottom: 15px;
 }
