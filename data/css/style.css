@@ -67,7 +67,6 @@ img{
   height: 100px;
   display: block;
   position: relative;
-  top: 50px;
 }
 
 input{
@@ -163,7 +162,7 @@ button:hover{
   background-color: #586478;
 }
 
-#topbar{
+#topbar, #topbar_log{
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   min-height: 50px;
@@ -173,7 +172,7 @@ button:hover{
   -ms-transition: all ease .5s;
 }
 
-#topbar p{
+#topbar p, #topbar_log p{
   padding-top: 15px;
   font-size: 15px;
   padding-bottom: 15px;

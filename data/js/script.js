@@ -17,12 +17,14 @@ function initCanvas(){
     e.preventDefault();
     trans(true);
   }, false);
+
   document.getElementById('back').addEventListener('click', function(e){
     e.preventDefault();
     trans(false);
   }, false);
 
   document.getElementById('subscribe').addEventListener('click', subscribe, false);
+  document.getElementById('log').addEventListener('click', login, false);
 
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
@@ -75,6 +77,36 @@ function trans(add){
   }
 }
 
+function login(e){
+  e.preventDefault();
+  var isFill = false;
+  var data = document.getElementsByClassName('log_input');
+  for(var i = 0; i < data.length; i++){
+    if(data[i].value){
+      isFill = true;
+    } else{
+      isFill = false;
+    }
+  }
+
+  if(isFill){
+    var logSocket = io();
+    logSocket.emit('login',{user:data[0].value, password:data[1].value});
+
+    var el = document.getElementById('topbar_log');
+
+    logSocket.on("logRes", function(data){
+      if(data.result == "error"){
+        el.childNodes[0].innerHTML = 'network error';
+        el.style.backgroundColor = "#fa6c6c";
+      } else{
+        el.childNodes[0].innerHTML = 'wrong login or password';
+        el.style.backgroundColor = "#fa6c6c";
+      }
+    })
+  }
+}
+
 function subscribe(e){
   // disable the default event
   e.preventDefault();
@@ -97,7 +129,6 @@ function subscribe(e){
     var topbar = document.getElementById('topbar');
     var socket = io();
     socket.emit('signup',{login:input[0].value, password: input[1].value, email: input[2].value});
-
 
     socket.on('response', function(data){
       console.log(data.result);
