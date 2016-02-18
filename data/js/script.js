@@ -154,6 +154,8 @@ function subscribe(e){
           topbar.style.backgroundColor = "#fa6c6c";
         break;
       }
+    }, function(err){
+      console.log(err);
     })
   }
 }

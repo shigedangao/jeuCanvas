@@ -4,13 +4,17 @@ var sql = require('mysql');
 var path = require('path');
 var validator = require('validator');
 const crypto = require('crypto');
+var http = require('http');
+var querystring = require('querystring');
+
+
 const secret = "chinese_girl";
 
 var app = express();
 var server  = app.listen(3000);
 var io = require('socket.io').listen(server);
 
-// database
+// database remove when antony finish it's stuff
 var connectionCredential = sql.createPool({
   connectionLimit: 20,
   host : '127.0.0.1:3306',
@@ -19,6 +23,9 @@ var connectionCredential = sql.createPool({
   database : 'laby',
   socketPath : "/Applications/MAMP/tmp/mysql/mysql.sock"
 });
+
+
+
 
 var user = {};
 
@@ -32,37 +39,47 @@ app.get('/', function(req, res){
   io.on('connection', function(socket){
 
     // signup
-
-    socket.on('signup', function(data){
+    socket.on('signup', function(data, err){
       if(validator.isEmail(data.email)){
-        connectionCredential.getConnection(function(err, connection){
-          if(err){
-            socket.emit('response', {result:"network"});
-          } else {
-            connection.query("SELECT * FROM user WHERE login='"+data.login+"' OR mail='"+data.email+"'", function(err, res){
-              if(res.length == 0){
 
-                const hash = crypto.createHmac('sha256', secret).update(data.password).digest('hex');
-
-                connection.query("INSERT INTO user (login, password, mail) VALUES ('"+data.login+"','"+hash+"','"+data.email+"')", function(err){
-                  if(err){
-                    socket.emit('response', {result:"error"});
-                  }
-                  else{
-                    socket.emit('response', {result:"success"});
-                    connection.release();
-                  }
-                });
-              } else{
-                socket.emit('response', {result:"user exist"});
-              }
-            });
-          }
+        var signData = querystring.stringify({
+          'login' : data.login,
+          'password': crypto.createHmac('sha256', secret).update(data.password).digest('hex'),
+          'mail': data.email
         });
+
+        var reqSub = {
+          hostname: 'localhost',
+          port: 8888,
+          path: '/LabyM/php/sign.php',
+          method: 'POST',
+          headers: {
+             'Content-Type': 'application/x-www-form-urlencoded',
+             'Content-Length': signData.length
+          }
+        }
+
+        var req = http.request(reqSub, (res) => {
+          res.setEncoding('utf8');
+          res.on('data', (res) => {
+            socket.emit('response', {result:res});
+          });
+
+          res.on('end', (res) => {
+            console.log('No more data in response.');
+          });
+        });
+
+        req.on('error', (e) => {
+          console.log("error "+e);
+          socket.emit('response', {result:"network"});
+        })
+
+        req.write(signData);
+        req.end();
       } else{
         socket.emit('response', {result:"credentials"});
       }
-
     });
 
     // login
