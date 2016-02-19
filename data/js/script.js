@@ -96,14 +96,23 @@ function login(e){
     var el = document.getElementById('topbar_log');
 
     logSocket.on("logRes", function(data){
+      console.log(data);
       if(data.result == "error"){
         el.childNodes[0].innerHTML = 'network error';
         el.style.backgroundColor = "#fa6c6c";
-      } else{
+      }
+      else if(data.result == "dolog"){
+        console.log(data.result);
+        debugger;
+        window.location.href="home";
+      }
+      else{
         el.childNodes[0].innerHTML = 'wrong login or password';
         el.style.backgroundColor = "#fa6c6c";
       }
-    })
+    });
+
+
   }
 }
 

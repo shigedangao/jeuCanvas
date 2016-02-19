@@ -1,5 +1,6 @@
 // depedencies
 var express = require('express');
+var file = require('fs');
 var sql = require('mysql');
 var path = require('path');
 var validator = require('validator');
@@ -15,21 +16,11 @@ var server  = app.listen(3000);
 var io = require('socket.io').listen(server);
 
 // database remove when antony finish it's stuff
-var connectionCredential = sql.createPool({
-  connectionLimit: 20,
-  host : '127.0.0.1:3306',
-  user : 'root',
-  password : 'root',
-  database : 'laby',
-  socketPath : "/Applications/MAMP/tmp/mysql/mysql.sock"
-});
-
-
-
 
 var user = {};
 
 app.get('/', function(req, res){
+
 
   // define a connection to the database // localhost, change if the server is different.
 
@@ -59,13 +50,13 @@ app.get('/', function(req, res){
           }
         }
 
-        var req = http.request(reqSub, (res) => {
-          res.setEncoding('utf8');
-          res.on('data', (res) => {
+        var req = http.request(reqSub, (resSign) => {
+          resSign.setEncoding('utf8');
+          resSign.on('data', (res) => {
             socket.emit('response', {result:res});
           });
 
-          res.on('end', (res) => {
+          resSign.on('end', (res) => {
             console.log('No more data in response.');
           });
         });
@@ -85,27 +76,53 @@ app.get('/', function(req, res){
     // login
 
     socket.on('login', function(data){
-      var checkPassword = crypto.createHmac('sha256', secret).update(data.password).digest('hex');
-    //  console.log(checkPassword);
-      connectionCredential.getConnection(function(err, connection){
-        if(err){
-        //  console.log("erreur");
-          socket.emit('logRes', {result:"error"});
-        } else{
-          // check if the user exist and check if the password is right
-          connection.query("SELECT * FROM user WHERE login='"+data.user+"' AND password='"+checkPassword+"'", function(err, res){
-            if(res.length != 0){
-              console.log('ok right');
-              // now i think that we need to use express session
-            } else{
-              console.log("not right");
-              socket.emit('logRes', {result:"credentials"});
-            }
-          })
+      // request
+
+      var logData = querystring.stringify({
+        'login' : data.user,
+        'password' : crypto.createHmac('sha256', secret).update(data.password).digest('hex')
+      });
+
+      var reqLog = {
+        hostname: 'localhost',
+        port: 8888,
+        path: '/LabyM/php/login.php',
+        method: 'POST',
+        headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+           'Content-Length': logData.length
         }
-      })
+      }
+
+      var logReq = http.request(reqLog, (result) =>{
+
+        result.setEncoding('utf8');
+        result.on('data', (myRes) => {
+          console.log(myRes);
+          if(myRes == "success"){
+            socket.emit('logRes', {result:"dolog"});
+          } else{
+            socket.emit('logRes', {result:"credentials"});
+          }
+        });
+
+        result.on('error', (e) =>{
+          //console.log(e);
+          socket.emit('logRes', {result:"credentials"});
+        });
+      });
+
+      logReq.write(logData);
+
+      logReq.on('error', (e) =>{
+        socket.emit('logRes', {result:"error"});
+      });
+
+      logReq.end();
     });
-
   });
+});
 
+app.get('/home', function(req, res){
+  res.send('hi');
 });
