@@ -4,9 +4,6 @@
 $user = 'root';
 $password = 'root';
 
-
-
-
 $mysqli = new mysqli('localhost',$user,$password, 'laby') or die("erreur de connexion au serveur");
 
 if($mysqli->connect_errno){

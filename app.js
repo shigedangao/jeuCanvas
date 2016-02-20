@@ -7,29 +7,28 @@ var validator = require('validator');
 const crypto = require('crypto');
 var http = require('http');
 var querystring = require('querystring');
+var jsontoken = require('jsonwebtoken');
+const EventEmitter = require('events');
 
 
 const secret = "chinese_girl";
+const saveToken = new EventEmitter();
 
 var app = express();
 var server  = app.listen(3000);
 var io = require('socket.io').listen(server);
-
 // database remove when antony finish it's stuff
 
-var user = {};
+var actualUser = [];
 
-app.get('/', function(req, res){
+// global socket;
 
-
+app.get('/', function(req, res, next){
   // define a connection to the database // localhost, change if the server is different.
-
   app.use(express.static(__dirname + '/data'));
   res.sendFile(path.join(__dirname,'index.html'));
 
   io.on('connection', function(socket){
-
-    // signup
     socket.on('signup', function(data, err){
       if(validator.isEmail(data.email)){
 
@@ -53,7 +52,7 @@ app.get('/', function(req, res){
         var req = http.request(reqSub, (resSign) => {
           resSign.setEncoding('utf8');
           resSign.on('data', (res) => {
-            socket.emit('response', {result:res});
+            io.to(id).emit('response', {result:res});
           });
 
           resSign.on('end', (res) => {
@@ -63,21 +62,19 @@ app.get('/', function(req, res){
 
         req.on('error', (e) => {
           console.log("error "+e);
-          socket.emit('response', {result:"network"});
+          io.to(id).emit('response', {result:"network"});
         })
 
         req.write(signData);
         req.end();
       } else{
-        socket.emit('response', {result:"credentials"});
+        io.to(id).emit('response', {result:"credentials"});
       }
     });
 
     // login
 
     socket.on('login', function(data){
-      // request
-
       var logData = querystring.stringify({
         'login' : data.user,
         'password' : crypto.createHmac('sha256', secret).update(data.password).digest('hex')
@@ -95,34 +92,75 @@ app.get('/', function(req, res){
       }
 
       var logReq = http.request(reqLog, (result) =>{
-
         result.setEncoding('utf8');
         result.on('data', (myRes) => {
-          console.log(myRes);
           if(myRes == "success"){
-            socket.emit('logRes', {result:"dolog"});
+            var token = jsontoken.sign({login : data.user, password : data.password}, "codingagainagain..");
+            io.to(socket.id).emit('logRes', {result:"dolog", myToken : token});
+            saveToken.emit('save', {myToken: token, username: data.user});
           } else{
-            socket.emit('logRes', {result:"credentials"});
+            io.to(id).emit('logRes', {result:"credentials"});
           }
         });
 
         result.on('error', (e) =>{
           //console.log(e);
-          socket.emit('logRes', {result:"credentials"});
+          io.to(id).emit('logRes', {result:"credentials"});
         });
       });
 
       logReq.write(logData);
-
       logReq.on('error', (e) =>{
-        socket.emit('logRes', {result:"error"});
+        io.to(id).emit('logRes', {result:"error"});
       });
 
       logReq.end();
     });
   });
+
+
+  saveToken.on('save', (data) =>{
+    console.log('fired');
+    var tokenData = querystring.stringify({
+      'user' : data.username,
+      'token' : data.myToken
+    });
+
+    var pushToken = {
+      hostname: 'localhost',
+      port: 8888,
+      path: '/LabyM/php/insertToken.php',
+      method: 'POST',
+      headers: {
+         'Content-Type': 'application/x-www-form-urlencoded',
+         'Content-Length': tokenData.length
+      }
+    }
+
+    var tokenReq = http.request(pushToken, (resultToken) => {
+      resultToken.setEncoding('utf8');
+      resultToken.on('data', (e) => {
+        console.log(e);
+      });
+
+      resultToken.on('error', (e) => {
+        console.log("error");
+      });
+    });
+
+    tokenReq.on('error', (e) =>{
+      console.log('error');
+      console.log(e);
+    })
+
+    tokenReq.write(tokenData);
+    tokenReq.end();
+  })
 });
 
+
 app.get('/home', function(req, res){
-  res.send('hi');
+  app.use(express.static(__dirname + '/data'));
+  res.sendFile(path.join(__dirname,'home.html'));
+
 });

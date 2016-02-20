@@ -111,8 +111,6 @@ function login(e){
         el.style.backgroundColor = "#fa6c6c";
       }
     });
-
-
   }
 }
 
