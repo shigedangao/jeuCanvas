@@ -1,0 +1,207 @@
+body{
+  margin: 0;
+  padding: 0;
+  font-family: 'helvetica';
+  font-weight: lighter;
+}
+
+.sidebar_container{
+  width: 100vw;
+  height: 65px;
+  box-shadow: 1px 0px 3px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 99;
+}
+
+.top_bar{
+  width: 100%;
+  height: 100%;
+  background-color: #e6bc61;
+  display: flex;
+  display: -webkit-flex;
+}
+
+.user_container{
+  display: flex;
+  display: -webkit-flex;
+  width: 300px;
+  margin-left: 20px;
+}
+
+.avatar{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid white;
+  background-image: url("../img/avatar.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-top: 4px;
+}
+
+.user_container p{
+  font-size: 1em;
+  color: #3d4246;
+  padding-left: 20px;
+  text-transform: uppercase;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+
+#rankNom span:nth-child(2){
+  padding-left: 10px;
+}
+
+#wrapButton{
+  display: flex;
+  display: -webkit-flex;
+  width: 200px;
+  position: absolute;
+  right: 10px;
+}
+
+#wrapButton div{
+  padding: 5px 15px 0px 15px;
+  height: 25px;
+  border-radius: 3px;
+  border:1px solid white;
+  margin: 15px auto;
+}
+
+#wrapButton div p, #wrapButton div i{
+  margin: 0;
+  padding-top: 2px;
+}
+
+#wrapButton div i{
+  font-size: 1.8em;
+  padding-top: 0px;
+  margin-top: -3px;
+}
+
+.edit_button{
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  color: #4d4941;
+}
+
+.friend_side_bar{
+  width: 100%;
+  height: calc(100vh - 210px);
+  position: relative;
+  border-top: 1px solid white;
+}
+
+.user_list{
+  width: 70%;
+  height: 100%;
+  background-color: #e6bc61;
+}
+
+.con_list{
+  width: 30%;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  background-color: #f2d596;
+  top: 0;
+}
+
+
+/* ---- party & room ---- */
+
+#game_wrapper{
+  width: calc(100vw - 200px);
+  background-color: #faf8f4;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+
+#createRoom{
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  position: relative;
+  top: calc(50vh - 120px);
+}
+
+#createRoom p{
+  text-align: center;
+}
+
+#button{
+  width: 100px;
+  height: 100px;
+  background-color: #e6bc61;
+  border-radius: 50%;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 4em;
+}
+
+#button p{
+  padding-top: 7px;
+}
+
+
+/* --- list ---- */
+
+.list{
+  width: 200px;
+  height: calc(100% - 65px);
+  position: absolute;
+  right: 0;
+  top: 65px;
+  background-color: #d9d6d0;
+  padding-left: 20px;
+}
+
+.room-item, .person-item{
+  display: flex;
+  display: -webkit-flex;
+}
+
+.icon_place, .icon_avatar{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #4d4941;
+  position: relative;
+  left: 50px;
+  top: 8px;
+}
+
+.icon_avatar{
+  left: 0px;
+}
+
+.smaller_icon{
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #4d4941;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.full .smaller_icon{
+  background-color: #d97658;
+}
+
+h2{
+  font-size: 1em;
+  color: #4d4941;
+  font-weight: 500;
+}
+
+.person-item p{
+  padding-left: 10px;
+}

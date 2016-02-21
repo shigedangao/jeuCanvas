@@ -1,15 +1,83 @@
 <!DOCTYPE html>
+<!-- template for the home html // back office -->
 <html>
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bo.css">
     <script src="js/bo.js"></script>
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body id='body'>
-    
-    <p>load</p>
-    <p id="user"></p>
+    <div class="sidebar_container">
+      <div class="top_bar">
+        <div class="user_container">
+          <div id="wrap">
+            <div class="avatar"></div>
+          </div>
+          <div id="wrap">
+            <p id="user"></p>
+            <p id="rankNom"><span><i class="fa fa-trophy"></i></span><span id="rank">20</span></p>
+          </div>
+        </div>
+        <div id="wrapButton">
+          <div class="edit_button"><i class="fa fa-cog"></i></div>
+          <div class="disconnect_button"><p>DISCONNECT</p></div>
+        </div>
+      </div>
+    </div>
+    <div id="game_wrapper">
+      <div id="createRoom">
+        <div id="button"><p>+</p></div>
+        <p>créer une partie</p>
+      </div>
+      <div class="canvas_wrapper">
+        <canvas width="500" height="500"></canvas>
+      </div>
+    </div>
+    <div class="list">
+      <div id="room">
+        <h2>ROOM AVAILABLE</h2>
+        <div class="room-item">
+          <p>Salon 1 - 2 / 4</p>
+          <div class="icon_place">
+            <div class="smaller_icon"></div>
+          </div>
+        </div>
+        <div class="room-item full">
+          <p>Salon 1 - 2 / 4</p>
+          <div class="icon_place">
+            <div class="smaller_icon"></div>
+          </div>
+        </div>
+      </div>
+      <div id="people">
+        <h2>PERSONNE PRESENTE</h2>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Charlotte</p>
+        </div>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Marc</p>
+        </div>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Donia</p>
+        </div>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Sonia</p>
+        </div>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Xiong</p>
+        </div>
+        <div class="person-item">
+          <div class="icon_avatar"></div>
+          <p>Anthony</p>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
