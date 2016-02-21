@@ -19,7 +19,7 @@ var server  = app.listen(3000);
 var io = require('socket.io').listen(server);
 // database remove when antony finish it's stuff
 
-var actualUser = [];
+var user = [];
 
 // global socket;
 
@@ -52,7 +52,7 @@ app.get('/', function(req, res, next){
         var req = http.request(reqSub, (resSign) => {
           resSign.setEncoding('utf8');
           resSign.on('data', (res) => {
-            io.to(id).emit('response', {result:res});
+            io.to(socket.id).emit('response', {result:res});
           });
 
           resSign.on('end', (res) => {
@@ -62,13 +62,13 @@ app.get('/', function(req, res, next){
 
         req.on('error', (e) => {
           console.log("error "+e);
-          io.to(id).emit('response', {result:"network"});
+          io.to(socket.id).emit('response', {result:"network"});
         })
 
         req.write(signData);
         req.end();
       } else{
-        io.to(id).emit('response', {result:"credentials"});
+        io.to(socket.id).emit('response', {result:"credentials"});
       }
     });
 
@@ -97,70 +97,45 @@ app.get('/', function(req, res, next){
           if(myRes == "success"){
             var token = jsontoken.sign({login : data.user, password : data.password}, "codingagainagain..");
             io.to(socket.id).emit('logRes', {result:"dolog", myToken : token});
-            saveToken.emit('save', {myToken: token, username: data.user});
           } else{
-            io.to(id).emit('logRes', {result:"credentials"});
+            io.to(socket.id).emit('logRes', {result:"credentials"});
           }
         });
 
         result.on('error', (e) =>{
           //console.log(e);
-          io.to(id).emit('logRes', {result:"credentials"});
+          io.to(socket.id).emit('logRes', {result:"credentials"});
         });
       });
 
       logReq.write(logData);
       logReq.on('error', (e) =>{
-        io.to(id).emit('logRes', {result:"error"});
+        io.to(socket.id).emit('logRes', {result:"error"});
       });
 
       logReq.end();
     });
   });
-
-
-  saveToken.on('save', (data) =>{
-    console.log('fired');
-    var tokenData = querystring.stringify({
-      'user' : data.username,
-      'token' : data.myToken
-    });
-
-    var pushToken = {
-      hostname: 'localhost',
-      port: 8888,
-      path: '/LabyM/php/insertToken.php',
-      method: 'POST',
-      headers: {
-         'Content-Type': 'application/x-www-form-urlencoded',
-         'Content-Length': tokenData.length
-      }
-    }
-
-    var tokenReq = http.request(pushToken, (resultToken) => {
-      resultToken.setEncoding('utf8');
-      resultToken.on('data', (e) => {
-        console.log(e);
-      });
-
-      resultToken.on('error', (e) => {
-        console.log("error");
-      });
-    });
-
-    tokenReq.on('error', (e) =>{
-      console.log('error');
-      console.log(e);
-    })
-
-    tokenReq.write(tokenData);
-    tokenReq.end();
-  })
 });
 
 
-app.get('/home', function(req, res){
+app.get('/home' ,function(req, res){
   app.use(express.static(__dirname + '/data'));
   res.sendFile(path.join(__dirname,'home.html'));
 
+
+  // connection check if the token exist
+
+  io.on('connection', function(socket){
+    socket.on('getToken', (e) =>{
+      if(e.token != "noToken"){
+        var deserialize = jsontoken.verify(e.token, 'codingagainagain..', function(err, decoded){
+          console.log(decoded);
+          io.to(socket.id).emit('credentials', {user : decoded.login, password : decoded.password});
+        });
+      } else{
+        socket.emit("unAuth", {res : "noAuth"});
+      }
+    });
+  });
 });

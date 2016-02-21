@@ -103,6 +103,7 @@ function login(e){
       }
       else if(data.result == "dolog"){
         console.log(data.result);
+        localStorage.setItem('myToken', data.myToken);
         debugger;
         window.location.href="home";
       }
