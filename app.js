@@ -95,7 +95,7 @@ app.get('/', function(req, res, next){
         result.setEncoding('utf8');
         result.on('data', (myRes) => {
           if(myRes == "success"){
-            var token = jsontoken.sign({login : data.user, password : data.password}, "codingagainagain..");
+            var token = jsontoken.sign({login : data.user}, "codingagainagain..");
             io.to(socket.id).emit('logRes', {result:"dolog", myToken : token});
           } else{
             io.to(socket.id).emit('logRes', {result:"credentials"});
@@ -119,52 +119,46 @@ app.get('/', function(req, res, next){
 });
 
 
-function checkUser(usr){
-  var toPush = true;
-  for(var i = 0; i < user.length; i++){
-    if(user[i] != usr){
-      toPush = true;
-    } else{
-      toPush = false;
-      break;
-    }
-  }
-
-
-  if(toPush){
-    user.push(usr);
-  }
-}
-
-
 app.get('/home' ,function(req, res){
   app.use(express.static(__dirname + '/data'));
   res.sendFile(path.join(__dirname,'home.html'));
 
   // connection check if the token exist
-
   io.on('connection', function(socket){
-
     // remove login listener to avoid event leaking
 
     socket.removeListener('login', function(){console.log('done');});
     socket.removeListener('signup', function(){console.log('done');});
 
     socket.on('getToken', (e) =>{
+
       if(e.token != "noToken"){
         var deserialize = jsontoken.verify(e.token, 'codingagainagain..', function(err, decoded){
           console.log(decoded);
-          io.to(socket.id).emit('credentials', {user : decoded.login, password : decoded.password});
-          checkUser(decoded.login);
+          io.to(socket.id).emit('credentials', {user : decoded.login});
         });
       } else{
         socket.emit("unAuth", {res : "noAuth"});
       }
     });
 
-    socket.on('getFriend', (e) =>{
-      socket.emit('userList', {user});
+    socket.on('setUser', (e) =>{
+      var countUsr = 0;
+      var isNotPresent = true;
+      while(countUsr < user.length && isNotPresent){
+        if(e.username == user[countUsr].username){
+          isNotPresent = false;
+        }
+        countUsr++;
+      }
 
+      if(isNotPresent){
+        user.push({username : e.username, socketID : socket.id});
+      }
+
+      socket.emit('getFriend', {userList : user});
     });
+
+
   });
 });
