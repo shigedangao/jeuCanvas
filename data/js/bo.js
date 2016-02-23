@@ -1,12 +1,11 @@
 (function() {
   document.addEventListener('DOMContentLoaded', initBo, false);
+  console.log('rec');
 })();
-
-
 
 function initBo(){
   var username = '';
-  console.log('fired');
+  var isAuth = false;
 
   var bo = io();
 
@@ -29,21 +28,24 @@ function initBo(){
     window.location.href = "/";
   });
 
-
   bo.on('getFriend', function(friendList){
-    bo.removeListener('setUser');
-    bo.removeListener('getFriend');
+    console.log('la');
+    // remove all node
     var parent = document.getElementById('people');
-    console.log(friendList);
+
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+
     for(var i = 0; i < friendList.userList.length; i++){
       if(friendList.userList[i].username != username){
-        console.log(friendList.userList[i].username);
         var div = document.createElement('DIV');
         var iconDIV = document.createElement('DIV');
         var text = document.createElement('P');
 
         text.innerHTML = friendList.userList[i].username;
         div.className = "person-item";
+        div.setAttribute("data-id", friendList.userList[i].socketID);
         iconDIV.className = "icon_avatar";
 
         div.appendChild(iconDIV);
@@ -52,4 +54,14 @@ function initBo(){
       }
     }
   });
-}
+
+  bo.on('test', function(){
+    console.log('ok');
+  });
+
+  document.getElementById('disc').addEventListener('click', function(){
+    localStorage.removeItem('myToken');
+    bo.emit('remove', {user : username});
+    window.location.href = '/';
+  }, false);
+};

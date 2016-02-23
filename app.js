@@ -126,15 +126,11 @@ app.get('/home' ,function(req, res){
   // connection check if the token exist
   io.on('connection', function(socket){
     // remove login listener to avoid event leaking
-
-    socket.removeListener('login', function(){console.log('done');});
-    socket.removeListener('signup', function(){console.log('done');});
-
     socket.on('getToken', (e) =>{
 
       if(e.token != "noToken"){
         var deserialize = jsontoken.verify(e.token, 'codingagainagain..', function(err, decoded){
-          console.log(decoded);
+        //  console.log(decoded);
           io.to(socket.id).emit('credentials', {user : decoded.login});
         });
       } else{
@@ -143,6 +139,8 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('setUser', (e) =>{
+
+      console.log('set user');
       var countUsr = 0;
       var isNotPresent = true;
       while(countUsr < user.length && isNotPresent){
@@ -154,6 +152,19 @@ app.get('/home' ,function(req, res){
 
       if(isNotPresent){
         user.push({username : e.username, socketID : socket.id});
+      }
+
+      io.sockets.emit('getFriend', {userList : user});
+      io.sockets.emit('test', {test:"test"});
+      console.log('emit');
+    });
+
+
+    socket.on('remove', function(username){
+      for(var i = 0 ; i < user.length; i++){
+        if(user[i].username == username.user){
+          user.splice(i,i);
+        }
       }
 
       socket.emit('getFriend', {userList : user});
