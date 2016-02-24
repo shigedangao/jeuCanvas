@@ -83,6 +83,14 @@ body{
   padding-left: 8px !important;
   padding-right: 8px !important;
   color: #4d4941;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+}
+
+.edit_button:hover{
+  background-color: #f8d37c;
+  cursor: pointer;
 }
 
 .friend_side_bar{
@@ -124,6 +132,13 @@ body{
   margin: 0 auto;
   position: relative;
   top: calc(50vh - 120px);
+  filter: drop-shadow(0px 0px 3px rgba(0,0,0,0.3));
+  -webkit-filter: drop-shadow(0px 0px 3px rgba(0,0,0,0.3));
+  -moz-filter: drop-shadow(0px 0px 3px rgba(0,0,0,0.3));
+  z-index: 999999999999;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
 }
 
 #createRoom p{
@@ -160,6 +175,7 @@ body{
 .room-item, .person-item{
   display: flex;
   display: -webkit-flex;
+  position: relative;
 }
 
 .icon_place, .icon_avatar{
@@ -192,6 +208,43 @@ body{
   margin-bottom: auto;
 }
 
+.isOcc{
+  background-color: transparent;
+  border: 1px solid #4D4941;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  right: 25px;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+}
+
+.isOcc:hover{
+  background-color: #4D4941;
+}
+
+.innerOcc{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  background-color: white;
+}
+
 .full .smaller_icon{
   background-color: #d97658;
 }
@@ -204,4 +257,68 @@ h2{
 
 .person-item p{
   padding-left: 10px;
+}
+
+.disconnect_button{
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition: all ease .5s;
+  cursor: pointer;
+}
+
+.disconnect_button:hover{
+  background-color: #f8d37c;
+}
+
+.canvas_wrapper{
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  left: 0;
+}
+
+.room_win{
+  width: 500px;
+  height: 150px;
+  margin: 0 auto;
+  position: absolute;
+  top: calc(50vh - 50px);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.room_win input{
+  width: 100%;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #E7BD59;
+  padding-left: 10px;
+}
+
+.room_win p{
+  text-align: center;
+  font-size: 2em;
+  color: #4E4A42;
+}
+
+#validate{
+  background-color: #E7BD59;
+  width: 120px;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+  margin: 20px auto;
+  transition: all ease .5s;
+  -webkit-transition: all ease .5s;
+  -moz-transition:  all ease .5s;
+}
+
+#validate:hover{
+  background-color: #F9D476;
 }

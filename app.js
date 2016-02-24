@@ -167,7 +167,13 @@ app.get('/home' ,function(req, res){
         }
       }
 
-      socket.emit('getFriend', {userList : user});
+      console.log(user);
+
+      io.sockets.emit('getFriend', {userList : user});
+    });
+
+    socket.on('createRoom', function(userInRoom){
+      
     });
 
 
