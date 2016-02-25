@@ -80,6 +80,11 @@ function initBo(){
     console.log('ok');
   });
 
+  bo.on('join', function(room){
+    swal({   title: "Do you want to join "+room+" ?", type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",   closeOnConfirm: false });
+    bo.emit('joinRoom', room);
+  });
+
   document.getElementById('disc').addEventListener('click', function(){
     localStorage.removeItem('myToken');
     bo.emit('remove', {user : username});
@@ -102,22 +107,28 @@ function addUserToRoom(){
   }
 
   console.log(userForRoom);
-
 }
 
 function createRoom(){
-  document.getElementById('createRoom').style.opacity = 0;
+  if(userForRoom.length >= 1 && userForRoom.length <= 4){
+    document.getElementById('createRoom').style.opacity = 0;
 
-  setTimeout(function(){
-    document.getElementById('createRoom').style.visibility = "hidden";
-    document.getElementById('rr').style.visibility = "visible";
-    document.getElementById('rr').style.opacity = 1;
-  }, 500);
+    setTimeout(function(){
+      document.getElementById('createRoom').style.visibility = "hidden";
+      document.getElementById('rr').style.visibility = "visible";
+      document.getElementById('rr').style.opacity = 1;
+    }, 500);
 
+    document.getElementById('validate').addEventListener('click', function(){
+      var roomNameValue = document.getElementById('roomInput').value;
+      if(roomNameValue){
+        var ioEmit = io();
+        ioEmit.emit('createRoom', {userList : userForRoom, roomName : roomNameValue});
+      }
+    }, false);
+  } else{
+      console.log('please add users to the list');
+  }
 
-  document.getElementById('validate').addEventListener('click', function(){
-    var ioEmit = io();
-    io.emit('createRoom', {userList : userForRoom});
-  }, false);
 
 }

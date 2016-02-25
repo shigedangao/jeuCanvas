@@ -172,10 +172,21 @@ app.get('/home' ,function(req, res){
       io.sockets.emit('getFriend', {userList : user});
     });
 
-    socket.on('createRoom', function(userInRoom){
-      
+    socket.on('createRoom', function(room){
+      socket.join(room.roomName);
+      for(var i =0; i < room.userList.length; i++){
+        io.to(room.userList[i].socketID).emit('join',room.roomName);
+      }
     });
 
+    socket.on('joinRoom', function(roomName){
+      socket.join(roomName);
+
+
+      io.in(roomName).clients(function(error, clients){
+        console.log(clients);
+      })
+    });
 
   });
 });

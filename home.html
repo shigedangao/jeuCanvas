@@ -6,7 +6,9 @@
     <link rel="stylesheet" href="css/bo.css">
     <script src="js/bo.js"></script>
     <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/sweetalert.css">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/sweetalert.min.js"></script>
   </head>
   <body id='body'>
     <div class="sidebar_container">
@@ -35,7 +37,7 @@
         <canvas width="500" height="500"></canvas>
         <div class="room_win" id="rr">
           <p>Enter room name</p>
-          <input type="text" placeholder="La Koalition"></input>
+          <input type="text" placeholder="La Koalition" id="roomInput"></input>
           <div id="validate">Validate</div>
         </div>
       </div>

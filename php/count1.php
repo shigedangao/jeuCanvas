@@ -7,7 +7,7 @@ $mysqli = new mysqli('localhost',$user,$password, 'laby') or die("erreur de conn
 if($mysqli->connect_errno){
   echo 'error';
 } else{
-  $query = $mysqli->query("UPDATE laby SET nom_champ = nom_champ + 1 WHERE login='".$_POST["login"]."' AND password='".$_POST["password"]."'");
+  $query = $mysqli->query("UPDATE laby SET nom_champ = nom_champ + 1 WHERE login='".$_POST["login"]."'");
 $mysqli_close();
 header('Location: index.html');
 ?>
