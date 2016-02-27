@@ -139,8 +139,6 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('setUser', (e) =>{
-
-      console.log('set user');
       var countUsr = 0;
       var isNotPresent = true;
       while(countUsr < user.length && isNotPresent){
@@ -155,8 +153,6 @@ app.get('/home' ,function(req, res){
       }
 
       io.sockets.emit('getFriend', {userList : user});
-      io.sockets.emit('test', {test:"test"});
-      console.log('emit');
     });
 
 
@@ -180,13 +176,23 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('joinRoom', function(roomName){
-      socket.join(roomName);
+      if(roomName != "refuse"){
+        socket.join(roomName);
 
+        io.sockets.in(roomName).emit('welcome', 'hey');
+    //    socket.emit('welcome');
+      } else{
+        io.in(roomName).clients(function(error, clients){
+            if(clients.length == 0){
+              console.log(clients);
+              io.to(clients[0]).emit('refuse','refuse');
+              socket.leave(roomName);
+              console.log(clients);
+            }
+      //    console.log(io.in(roomName));
+        });
 
-      io.in(roomName).clients(function(error, clients){
-        console.log(clients);
-      })
+      }
     });
-
   });
 });
