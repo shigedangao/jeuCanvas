@@ -6,6 +6,7 @@
 var bo;
 
 var userForRoom = [];
+var roomList = [];
 var friendCount = 0;
 
 function initBo(){
@@ -44,6 +45,7 @@ function initBo(){
   });
 
   bo.on('getFriend', function(friendList){
+    console.log(friendList);
     //bo.removeListener('getFriend');
     // remove all node
     var count = 0;
@@ -83,6 +85,7 @@ function initBo(){
         div.appendChild(secDiv);
         secDiv.appendChild(thirdDiv);
         parent.appendChild(div);
+
         count++;
       }
     }
@@ -97,20 +100,70 @@ function initBo(){
   });
 
   bo.on('join', function(room){
-    swal({   title: "Do you want to join "+room+" ?", type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",   closeOnConfirm: true },function(isConfirm){
+    swal({   title: "Do you want to join "+room.roomname+" ?", type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",   closeOnConfirm: true },function(isConfirm){
       if(isConfirm){
-        bo.emit('joinRoom', room);
-        bo.removeListener('joinRoom');
+        bo.emit('joinRoom', {ref: '', roomname : room.roomname});
       }
       else{
-        bo.emit('joinRoom', 'refuse');
+        bo.emit('joinRoom', {ref: 'refuse', roomname : room.roomname});
       }
     });
 
   });
 
   bo.on('refuse', function(){
-      swal({   title: "Your friend refuse to join the party", type: "warning",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true });
+      swal({   title: "Your friend refuse to join the party", type: "warning",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true }, function(isConfim){
+        resetEl();
+        resetFriend();
+      });
+  });
+
+  bo.on('getRoom', function(data){
+  //  bo.removeListener('getRoom');
+
+    var parent = document.getElementById('room');
+
+    // clear room component
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+
+    for(var i = 0 ; i < data.length; i++){
+      var roomItem = document.createElement('DIV');
+          roomName = document.createElement('P'),
+          iconCont = document.createElement('icon_place'),
+          smallIcon = document.createElement('smaller_icon');
+
+        if(roomList[i] != data[i].roomname){
+          roomItem.className = "room-item";
+          console.log(data);
+          roomName.innerHTML = data[i].roomname+" "+data[i].user_count+" / 4";
+
+          iconCont.className = "icon_place";
+          smallIcon.className = "smaller_icon";
+          roomList.push(data[i].roomname);
+
+          if(data[i].user_count < 3){
+            smallIcon.style.color = "#4DDD6F";
+          }
+          else if(data[i].user_count == 3){
+            smallIcon.style.color = "#E7BD59";
+          }
+          else{
+            smallIcon.style.color = "#DB7654";
+          }
+
+          roomItem.appendChild(roomName);
+          roomItem.appendChild(iconCont);
+          iconCont.appendChild(smallIcon);
+
+          parent.appendChild(roomItem);
+        }
+    }
+  });
+
+  bo.on('initGame', function(){
+    
   });
 
   document.getElementById('disc').addEventListener('click', function(){
@@ -125,22 +178,32 @@ function initBo(){
 };
 
 function addUserToRoom(){
-  for(var e = 0; e < friendCount-1; e++){
-    console.log(e);
-    console.log(friendCount);
+  var toPush = true;
+  var count = 0;
+
+  while(count < friendCount && toPush){
+  console.log(friendCount);
     if(userForRoom.length > 0){
-      if(userForRoom[e].user != this.innerHTML){
-        userForRoom.push({user : this.getAttribute('data-name'), socketID : this.getAttribute("data-id")});
+      if(userForRoom[count] != undefined){
+        console.log(this.childNodes[1].innerHTML);
+        if(userForRoom[count].user != this.childNodes[1].innerHTML){
+          toPush = true;
+        }
+        else{
+          toPush = false;
+      //    console.log('false');
+        }
       }
-    } else{
-        userForRoom.push({user : this.getAttribute('data-name'), socketID : this.getAttribute("data-id")});
     }
+
+  //  console.log(toPush);
+
+    count++;
   }
 
-  if(userForRoom.length == 0){
-    userForRoom.push({user : this.getAttribute('data-name'), socketID : this.getAttribute("data-id")});
+  if(toPush){
+      userForRoom.push({user : this.getAttribute('data-name'), socketID : this.getAttribute("data-id")});
   }
-
 
   document.getElementsByClassName('innerOcc')[this.getAttribute('data-index')].style.backgroundColor = "#E7BD59";
 
@@ -168,20 +231,26 @@ function createRoom(io){
     }, false);
 
     document.getElementById('cancel').addEventListener('click', function(){
-      document.getElementById('rr').style.opacity = 0;
+
 
       // reset the room array;
       userForRoom = new Array();
+      resetEl();
       resetFriend();
-      setTimeout(function(){
-        document.getElementById('createRoom').style.visibility = "visible";
-        document.getElementById('rr').style.visibility = "hidden";
-        document.getElementById('createRoom').style.opacity = 1;
-      },500);
+
     }, false);
   } else{
       swal({   title: "Please add a user to your list", type: "warning",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: false });
   }
+}
+
+function resetEl(){
+  document.getElementById('rr').style.opacity = 0;
+  setTimeout(function(){
+    document.getElementById('createRoom').style.visibility = "visible";
+    document.getElementById('rr').style.visibility = "hidden";
+    document.getElementById('createRoom').style.opacity = 1;
+  },500);
 }
 
 function resetFriend(){

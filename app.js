@@ -20,6 +20,9 @@ var io = require('socket.io').listen(server);
 // database remove when antony finish it's stuff
 
 var user = [];
+var roomList = [];
+var answer = 0;
+var received = 0;
 
 // global socket;
 
@@ -29,6 +32,7 @@ app.get('/', function(req, res, next){
   res.sendFile(path.join(__dirname,'index.html'));
 
   io.on('connection', function(socket){
+
     socket.on('signup', function(data, err){
       if(validator.isEmail(data.email)){
 
@@ -152,6 +156,7 @@ app.get('/home' ,function(req, res){
         user.push({username : e.username, socketID : socket.id});
       }
 
+      io.sockets.emit('getRoom', roomList);
       io.sockets.emit('getFriend', {userList : user});
     });
 
@@ -169,30 +174,51 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('createRoom', function(room){
+      received = 0;
       socket.join(room.roomName);
       for(var i =0; i < room.userList.length; i++){
-        io.to(room.userList[i].socketID).emit('join',room.roomName);
+        io.to(room.userList[i].socketID).emit('join',{roomname : room.roomName, emiterUser : socket.id});
+
       }
+
+      answer = room.userList.length+1;
     });
 
-    socket.on('joinRoom', function(roomName){
-      if(roomName != "refuse"){
-        socket.join(roomName);
+    socket.on('joinRoom', function(room){
+      if(room.ref != "refuse"){
+        socket.join(room.roomname);
 
-        io.sockets.in(roomName).emit('welcome', 'hey');
-    //    socket.emit('welcome');
-      } else{
-        io.in(roomName).clients(function(error, clients){
-            if(clients.length == 0){
-              console.log(clients);
-              io.to(clients[0]).emit('refuse','refuse');
-              socket.leave(roomName);
-              console.log(clients);
-            }
-      //    console.log(io.in(roomName));
+        io.in(room.roomname).clients(function(error, clients){
+          console.log('received '+received);
+          console.log(clients);
+          console.log(answer);
+          if(received == answer){
+            roomList.push({roomname : room.roomname, user_count : clients.length});
+            io.sockets.emit('getRoom', roomList);
+            io.sockets.in(room.roomname).emit('initGame');
+          }
+
         });
 
+        io.sockets.in(room.roomname).emit('welcome', 'hey');
+        received++;
+      } else{
+        io.in(room.roomname).clients(function(error, clients){
+            if(clients.length == 1){
+              io.to(clients[0]).emit('refuse','refuse');
+              socket.leave(room.roomname);
+            }
+        });
       }
     });
+
+
+    /* ---------------------- room property ---------------------- */
+
+    socket.on('initGame', function(){
+      
+    });
+
+
   });
 });
