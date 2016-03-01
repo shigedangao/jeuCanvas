@@ -224,7 +224,10 @@ app.get('/home' ,function(req, res){
     socket.on('setGame', function(roomname){
       console.log(roomname);
       io.sockets.in(roomname).emit('initGame');
-    })
+    });
+
+
+    
 
 
   });
