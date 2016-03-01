@@ -178,7 +178,6 @@ app.get('/home' ,function(req, res){
       socket.join(room.roomName);
       for(var i =0; i < room.userList.length; i++){
         io.to(room.userList[i].socketID).emit('join',{roomname : room.roomName, emiterUser : socket.id});
-
       }
 
       answer = room.userList.length+1;
@@ -193,14 +192,18 @@ app.get('/home' ,function(req, res){
           console.log(clients);
           console.log(answer);
           if(received == answer){
+            console.log('emit room');
             roomList.push({roomname : room.roomname, user_count : clients.length});
+            io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
             io.sockets.emit('getRoom', roomList);
-            io.sockets.in(room.roomname).emit('initGame');
+        //    io.sockets.in(room.roomname).emit('initGame');
           }
 
         });
 
         io.sockets.in(room.roomname).emit('welcome', 'hey');
+
+      //
         received++;
       } else{
         io.in(room.roomname).clients(function(error, clients){
@@ -209,15 +212,19 @@ app.get('/home' ,function(req, res){
               socket.leave(room.roomname);
             }
         });
+
+
       }
+
     });
 
 
     /* ---------------------- room property ---------------------- */
 
-    socket.on('initGame', function(){
-      
-    });
+    socket.on('setGame', function(roomname){
+      console.log(roomname);
+      io.sockets.in(roomname).emit('initGame');
+    })
 
 
   });

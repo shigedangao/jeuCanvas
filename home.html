@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/sweetalert.css">
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/sweetalert.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js"></script>
   </head>
   <body id='body'>
     <div class="sidebar_container">
@@ -34,7 +35,7 @@
         <p>créer une partie</p>
       </div>
       <div class="canvas_wrapper">
-        <canvas width="500" height="500"></canvas>
+        <canvas width="500" height="500" id="canvas"></canvas>
         <div class="room_win" id="rr">
           <p>Enter room name</p>
           <input type="text" placeholder="La Koalition" id="roomInput"></input>
@@ -48,7 +49,7 @@
     <div class="list">
       <h2>ROOM AVAILABLE</h2>
       <div id="room">
-  
+
       </div>
       <h2>PERSONNE PRESENTE</h2>
       <div id="people">

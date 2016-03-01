@@ -8,6 +8,7 @@ var bo;
 var userForRoom = [];
 var roomList = [];
 var friendCount = 0;
+var userRoom = '';
 
 function initBo(){
   var username = '';
@@ -45,9 +46,9 @@ function initBo(){
   });
 
   bo.on('getFriend', function(friendList){
+    roomList = new Array();
     console.log(friendList);
-    //bo.removeListener('getFriend');
-    // remove all node
+
     var count = 0;
     var parent = document.getElementById('people');
 
@@ -95,8 +96,11 @@ function initBo(){
     for(var j = 0; j < isOcc.length; j++){
       isOcc[j].addEventListener('click', addUserToRoom ,false);
     }
+  });
 
-    console.log(isOcc);
+  bo.on('saveRoom', function(data){
+    userRoom = data;
+    bo.emit('setGame', userRoom);
   });
 
   bo.on('join', function(room){
@@ -119,6 +123,8 @@ function initBo(){
   });
 
   bo.on('getRoom', function(data){
+  //  console.log('get room');
+  //  console.log(data);
   //  bo.removeListener('getRoom');
 
     var parent = document.getElementById('room');
@@ -129,6 +135,7 @@ function initBo(){
     }
 
     for(var i = 0 ; i < data.length; i++){
+      //console.log(roomList);
       var roomItem = document.createElement('DIV');
           roomName = document.createElement('P'),
           iconCont = document.createElement('icon_place'),
@@ -163,7 +170,13 @@ function initBo(){
   });
 
   bo.on('initGame', function(){
-    
+
+    // init canvas here -- test canvas
+    initCanvas();
+
+
+
+
   });
 
   document.getElementById('disc').addEventListener('click', function(){
@@ -258,4 +271,60 @@ function resetFriend(){
   for(var i = 0 ; i< friendList.length; i++){
     friendList[i].style.backgroundColor = "#54db74";
   }
+}
+
+function initCanvas(){
+  canvas.width = window.innerWidth - 200;
+  canvas.height= window.innerHeight - 65;
+
+  var can = new fabric.Canvas('canvas');
+
+  var mycan = new _func_();
+  mycan.generateCell(can);
+  mycan.setUser(can);
+
+
+  document.addEventListener('keypress', function(){
+    console.log('fired bithc');
+    mycan.updatePos(can);
+    
+  });
+}
+
+/* apple device */
+
+function backingScale(context) {
+    if ('devicePixelRatio' in window) {
+        if (window.devicePixelRatio > 1) {
+            return window.devicePixelRatio;
+        }
+    }
+    return 1;
+}
+
+function _func_(can){
+  this.can = can;
+  var us;
+
+  this.generateCell = function(can){
+    var nbTale = canvas.width / 40;
+    var hgTale = canvas.height / 40;
+    for(var i = 0 ; i < nbTale; i++){
+      for(var j = 0; j < hgTale; j++){
+        can.add(new fabric.Rect({left: i*40, top: j*40, stroke : 'red', width: 40, height: 40, hasBorders : false, hasControls : false, selectable: false}));
+      }
+    }
+  };
+
+  this.setUser = function(can){
+    us = new fabric.Circle({ radius: 30, fill: '#f55', top: 0, left: 0 , hasControls : false, hasBorders : false});
+    can.add(us);
+  }
+
+  this.updatePos = function(can){
+    us.set({left: 40});
+    can.renderAll();
+  }
+
+
 }
