@@ -188,17 +188,10 @@ app.get('/home' ,function(req, res){
         socket.join(room.roomname);
 
         io.in(room.roomname).clients(function(error, clients){
-          console.log('received '+received);
-          console.log(clients);
-          console.log(answer);
-          if(received == answer){
             console.log('emit room');
             roomList.push({roomname : room.roomname, user_count : clients.length});
             io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
             io.sockets.emit('getRoom', roomList);
-        //    io.sockets.in(room.roomname).emit('initGame');
-          }
-
         });
 
         io.sockets.in(room.roomname).emit('welcome', 'hey');
@@ -211,24 +204,44 @@ app.get('/home' ,function(req, res){
               io.to(clients[0]).emit('refuse','refuse');
               socket.leave(room.roomname);
             }
+
+
+
         });
-
-
       }
-
     });
 
 
     /* ---------------------- room property ---------------------- */
 
     socket.on('setGame', function(roomname){
-      console.log(roomname);
-      io.sockets.in(roomname).emit('initGame');
+      var reqSub = {
+        hostname: 'localhost',
+        port: 8888,
+        path: '/LabyM/php/laby.php',
+        method: 'GET',
+        headers: {
+           'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+
+      var request = http.request(reqSub, (laby) => {
+        laby.setEncoding('utf8');
+        laby.on('data', (res) => {
+          io.sockets.in(roomname).emit('initGame', res);
+        });
+
+        laby.on('end', (res) => {
+          console.log('No more data in response.');
+        });
+      });
+
+      request.on('error', (e) => {
+        console.log("error "+e);
+      })
+
+      request.write('');
+      request.end();
     });
-
-
-    
-
-
   });
 });

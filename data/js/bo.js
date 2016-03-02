@@ -169,13 +169,12 @@ function initBo(){
     }
   });
 
-  bo.on('initGame', function(){
-
-    // init canvas here -- test canvas
-    initCanvas();
-
+  bo.on('initGame', function(data){
+    data = JSON.parse(data);
+    bo.removeListener('initGame');
 
 
+    initCanvas(data);
 
   });
 
@@ -209,7 +208,6 @@ function addUserToRoom(){
       }
     }
 
-  //  console.log(toPush);
 
     count++;
   }
@@ -273,21 +271,21 @@ function resetFriend(){
   }
 }
 
-function initCanvas(){
+function initCanvas(data){
   canvas.width = window.innerWidth - 200;
   canvas.height= window.innerHeight - 65;
 
   var can = new fabric.Canvas('canvas');
 
   var mycan = new _func_();
-  mycan.generateCell(can);
+  mycan.generateCell(can, data);
   mycan.setUser(can);
 
 
   document.addEventListener('keypress', function(){
     console.log('fired bithc');
     mycan.updatePos(can);
-    
+
   });
 }
 
@@ -306,13 +304,32 @@ function _func_(can){
   this.can = can;
   var us;
 
-  this.generateCell = function(can){
+  this.generateCell = function(can, data){
     var nbTale = canvas.width / 40;
     var hgTale = canvas.height / 40;
-    for(var i = 0 ; i < nbTale; i++){
-      for(var j = 0; j < hgTale; j++){
-        can.add(new fabric.Rect({left: i*40, top: j*40, stroke : 'red', width: 40, height: 40, hasBorders : false, hasControls : false, selectable: false}));
+    var dim = Math.floor(canvas.width/20);
+
+    for(var i = 0 ; i < data.length; i++){
+      var x = (i%20)*dim;
+      var y = Math.floor(i/20)*dim;
+
+      if(data[i]["N"]<0){
+        can.add(new fabric.Line([x,y,x+dim,y], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
       }
+
+      if(data[i]["S"]<0){
+        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+      }
+
+      if(data[i]["E"]<0){
+        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+      }
+
+      if(data[i]["O"]<0){
+        can.add(new fabric.Line([x,y,x,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+      }
+
+
     }
   };
 
