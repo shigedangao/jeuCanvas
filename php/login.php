@@ -4,13 +4,13 @@
 $user = 'root';
 $password = 'root';
 
-$req = mysql_connect('localhost',$user,$password, 'laby') or die("erreur de connexion au serveur");
+$mysqli = new mysqli('localhost',$user,$password, 'laby') or die("erreur de connexion au serveur");
 
-if(!$req){
-  echo ('error' .mysql_error());
+if($mysqli->connect_errno){
+  echo 'error';
 } else{
 
-  $query = $req->query("SELECT * FROM user WHERE login='".$_POST["login"]."' AND password='".$_POST["password"]."'");
+  $query = $mysqli->query("SELECT * FROM user WHERE login='".$_POST["login"]."' AND password='".$_POST["password"]."'");
   $row = $query -> num_rows;
   if($row) // Vérification du mot de passe contenu dans la BD
       {
