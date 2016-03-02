@@ -3,11 +3,12 @@
 session_start();
 $_SESSION['login'] = $_POST['login'];
 $_SESSION['password'] = $_POST['password'];
-$mysqli = new mysqli('localhost',$user,$password, 'laby') or die("erreur de connexion au serveur");
-if($mysqli->connect_errno){
-  echo 'error';
+
+$req = mysql_connect('localhost',$user,$password, 'laby') or die("erreur de connexion au serveur");
+if(!$req){
+  echo ('error' .mysql_error);
 } else{
-  $query = $mysqli->query("UPDATE laby SET nom_champ = nom_champ + 1 WHERE login='".$_POST["login"]."'");
-$mysqli_close();
+  $query = $req->query("UPDATE laby SET nom_champ = nom_champ + 1 WHERE login='".$_POST["login"]."'");
+mysql_close($req);
 header('Location: index.html');
 ?>
