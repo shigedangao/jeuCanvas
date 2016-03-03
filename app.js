@@ -212,6 +212,8 @@ app.get('/home' ,function(req, res){
     });
 
 
+
+
     /* ---------------------- room property ---------------------- */
 
     socket.on('setGame', function(roomname){
@@ -242,6 +244,12 @@ app.get('/home' ,function(req, res){
 
       request.write('');
       request.end();
+    });
+
+    socket.on('move', function(data){
+      console.log(data);
+      console.log('move received');
+      socket.broadcast.to(data.roomName).send({posX : data.posX, posY: data.posY});
     });
   });
 });

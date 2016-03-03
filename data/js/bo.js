@@ -9,6 +9,8 @@ var userForRoom = [];
 var roomList = [];
 var friendCount = 0;
 var userRoom = '';
+var mycan;
+var can;
 
 function initBo(){
   var username = '';
@@ -174,9 +176,16 @@ function initBo(){
     bo.removeListener('initGame');
 
 
-    initCanvas(data);
+    initCanvas(data, bo);
 
   });
+
+
+  bo.on('message', function(data){
+    mycan.setPosOfOther(data.posX, data.posY);
+  });
+
+  /* ------------------- DOM LISTENER ------------------- */
 
   document.getElementById('disc').addEventListener('click', function(){
     localStorage.removeItem('myToken');
@@ -271,23 +280,41 @@ function resetFriend(){
   }
 }
 
-function initCanvas(data){
+function initCanvas(data, bo){
+
   canvas.width = window.innerWidth - 200;
   canvas.height= window.innerHeight - 65;
 
-  var can = new fabric.Canvas('canvas');
+  can = new fabric.Canvas('canvas');
 
-  var mycan = new _func_();
+  mycan = new _func_(can, bo);
   mycan.generateCell(can, data);
   mycan.setUser(can);
 
 
-  document.addEventListener('keypress', function(){
-    console.log('fired bithc');
+  document.addEventListener('keypress', function(e){
+    if(e.keyCode == 115){
+      mycan.updatePos('left');
+    }
+    else if(e.keyCode == 122){
+      mycan.updatePos('forward');
+    }
+    else if(e.keyCode == 113){
+      mycan.updatePos('backward');
+    }
+    else if(e.keyCode == 100){
+      mycan.updatePos('right');
+    }
+
     mycan.updatePos(can);
 
-  });
+  }, true);
+
+
+
 }
+
+
 
 /* apple device */
 
@@ -300,7 +327,8 @@ function backingScale(context) {
     return 1;
 }
 
-function _func_(can){
+function _func_(can, bo){
+  var bo = bo;
   this.can = can;
   var us;
 
@@ -333,15 +361,64 @@ function _func_(can){
     }
   };
 
-  this.setUser = function(can){
-    us = new fabric.Circle({ radius: 30, fill: '#f55', top: 0, left: 0 , hasControls : false, hasBorders : false});
+  this.setUser = function(){
+    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 0, left: 0 , hasControls : false, hasBorders : false});
     can.add(us);
   }
 
-  this.updatePos = function(can){
-    us.set({left: 40});
-    can.renderAll();
+  this.updatePos = function(direction){
+    var oldPosX = us.left;
+    var oldPosY = us.top;
+    switch(direction){
+      case 'left':
+        var left = us.left;
+        us.set({left : left+5});
+      break;
+      case 'forward':
+        var top = us.top;
+        us.set({top: top+5});
+      break;
+      case 'backward':
+        var bottom = us.top;
+        us.set({top: bottom-5});
+      break;
+      case 'right':
+        var right = us.left;
+        us.set({left : right- 5});
+      break;
+    }
+
+    //us.set({left: 40});
+
+
+
+    // check collision
+
+
+    var item = can.getObjects();
+    var colCount = 0;
+  //  console.log(item);
+    for(var i = 0 ; i < item.length; i++){
+      if(us.intersectsWithObject(item[i])){
+        if(colCount > 1){
+          console.log('collision');
+          us.set({left: oldPosX, top: oldPosY});
+          us.setCoords();
+          can.renderAll();
+        }
+        else{
+          bo.emit('move', {roomName : userRoom, posX : us.left, posY : us.top });
+
+          us.setCoords();
+          can.renderAll();
+        }
+        colCount++;
+      }
+    }
   }
 
-
+  this.setPosOfOther = function(x,y){
+    us.set({left: x, top: y});
+    can.renderAll();
+  }
 }
