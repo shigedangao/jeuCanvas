@@ -188,8 +188,8 @@ app.get('/home' ,function(req, res){
         socket.join(room.roomname);
 
         io.in(room.roomname).clients(function(error, clients){
-            console.log('emit room');
-            roomList.push({roomname : room.roomname, user_count : clients.length});
+            console.log(clients);
+            roomList.push({roomname : room.roomname, user_count : clients.length, alluser : clients});
             io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
             io.sockets.emit('getRoom', roomList);
         });
@@ -204,9 +204,6 @@ app.get('/home' ,function(req, res){
               io.to(clients[0]).emit('refuse','refuse');
               socket.leave(room.roomname);
             }
-
-
-
         });
       }
     });
@@ -249,7 +246,7 @@ app.get('/home' ,function(req, res){
     socket.on('move', function(data){
       console.log(data);
       console.log('move received');
-      socket.broadcast.to(data.roomName).send({posX : data.posX, posY: data.posY});
+      socket.broadcast.to(data.roomName).send({userPos : data.userPos});
     });
   });
 });

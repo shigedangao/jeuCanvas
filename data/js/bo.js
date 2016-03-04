@@ -11,12 +11,28 @@ var friendCount = 0;
 var userRoom = '';
 var mycan;
 var can;
+var mySocketID;
+var totalPlayer = 0;
+
+
+var otherUserPos = new Array();
+
+
+var userOne,
+    userTwo,
+    userThree,
+    userFour;
+
+// USER ID WILL DEFINE THE INDEX ON THE ARRAY TO EMIT TO THE OTHER USER PRESENT IN THE ROOM
+
+var userID ;
 
 function initBo(){
   var username = '';
   var isAuth = false;
 
   var bo = io();
+
 
   if(localStorage.getItem('myToken')){
     bo.emit("getToken", {token : localStorage.getItem('myToken')});
@@ -169,6 +185,29 @@ function initBo(){
           parent.appendChild(roomItem);
         }
     }
+//    debugger;
+
+    try{
+    //  console.log('try');
+    //  console.log('length '+data[0].user_count);
+        mySocketID = bo.io.engine.id;
+        for(var loop = 0; loop < data[0].user_count; loop++){
+          var unknowuser = data[0].alluser[loop].split('/#')[1];
+        //  console.log('unknow '+unknowuser);
+        //  console.log('me '+mySocketID);
+          if(unknowuser == mySocketID){
+            userID = loop;
+          //  console.log(userID);
+          } else{
+            totalPlayer++;
+          }
+        }
+    }
+    catch(err){
+
+    }
+
+
   });
 
   bo.on('initGame', function(data){
@@ -182,7 +221,7 @@ function initBo(){
 
 
   bo.on('message', function(data){
-    mycan.setPosOfOther(data.posX, data.posY);
+    mycan.setPosOfOther(data);
   });
 
   /* ------------------- DOM LISTENER ------------------- */
@@ -203,10 +242,8 @@ function addUserToRoom(){
   var count = 0;
 
   while(count < friendCount && toPush){
-  console.log(friendCount);
     if(userForRoom.length > 0){
       if(userForRoom[count] != undefined){
-        console.log(this.childNodes[1].innerHTML);
         if(userForRoom[count].user != this.childNodes[1].innerHTML){
           toPush = true;
         }
@@ -290,6 +327,7 @@ function initCanvas(data, bo){
   mycan = new _func_(can, bo);
   mycan.generateCell(can, data);
   mycan.setUser(can);
+  mycan.setSlaveUser();
 
 
   document.addEventListener('keypress', function(e){
@@ -309,9 +347,6 @@ function initCanvas(data, bo){
     mycan.updatePos(can);
 
   }, true);
-
-
-
 }
 
 
@@ -356,14 +391,28 @@ function _func_(can, bo){
       if(data[i]["O"]<0){
         can.add(new fabric.Line([x,y,x,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
       }
-
-
     }
   };
 
   this.setUser = function(){
-    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 0, left: 0 , hasControls : false, hasBorders : false});
+
+    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 5, left: 5 , hasControls : false, hasBorders : false});
     can.add(us);
+  }
+
+  this.setSlaveUser = function(){
+    console.log('total '+totalPlayer);
+    for(var user = 0 ; user < totalPlayer; user++){
+      console.log('index usr '+user);
+      if(user == 1){
+        userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 5, left: 5 , hasControls : false, hasBorders : false});
+        can.add(userTwo);
+      }
+
+
+    }
+
+
   }
 
   this.updatePos = function(direction){
@@ -389,11 +438,7 @@ function _func_(can, bo){
     }
 
     //us.set({left: 40});
-
-
-
     // check collision
-
 
     var item = can.getObjects();
     var colCount = 0;
@@ -407,7 +452,13 @@ function _func_(can, bo){
           can.renderAll();
         }
         else{
-          bo.emit('move', {roomName : userRoom, posX : us.left, posY : us.top });
+          otherUserPos = new Array(totalPlayer);
+          console.log('user id '+userID);
+        //  var userPos = {posX: us.left, posY : us.top};
+          otherUserPos[userID] = {posX: us.left, posY : us.top};
+      //    console.log(otherUserPos);
+          bo.emit('move', {roomName: userRoom, userPos : otherUserPos});
+          //bo.emit('move', {roomName : userRoom, posX : us.left, posY : us.top });
 
           us.setCoords();
           can.renderAll();
@@ -417,8 +468,22 @@ function _func_(can, bo){
     }
   }
 
-  this.setPosOfOther = function(x,y){
-    us.set({left: x, top: y});
+  this.setPosOfOther = function(data){
+    otherUserPos = data;
+    //console.log(data);
+
+    console.log(data.userPos);
+
+    for(var u = 0 ; u < data.userPos.length; u++){
+      console.log(u);
+      if(u != userID){
+        if(u == 0){
+          userTwo.set({left: data[u].x, top: data[u].y});
+        }
+      }
+
+    }
+//    us.set({left: x, top: y});
     can.renderAll();
   }
 }
