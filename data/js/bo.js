@@ -13,6 +13,7 @@ var mycan;
 var can;
 var mySocketID;
 var totalPlayer = 0;
+var userArray = new Array();
 
 
 var otherUserPos = new Array();
@@ -125,6 +126,7 @@ function initBo(){
     swal({   title: "Do you want to join "+room.roomname+" ?", type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",   closeOnConfirm: true },function(isConfirm){
       if(isConfirm){
         bo.emit('joinRoom', {ref: '', roomname : room.roomname});
+
       }
       else{
         bo.emit('joinRoom', {ref: 'refuse', roomname : room.roomname});
@@ -152,7 +154,10 @@ function initBo(){
         parent.removeChild(parent.firstChild);
     }
 
+    console.log(data.length);
+
     for(var i = 0 ; i < data.length; i++){
+      console.log('fired');
       //console.log(roomList);
       var roomItem = document.createElement('DIV');
           roomName = document.createElement('P'),
@@ -161,12 +166,11 @@ function initBo(){
 
         if(roomList[i] != data[i].roomname){
           roomItem.className = "room-item";
-          console.log(data);
           roomName.innerHTML = data[i].roomname+" "+data[i].user_count+" / 4";
 
           iconCont.className = "icon_place";
           smallIcon.className = "smaller_icon";
-          roomList.push(data[i].roomname);
+
 
           if(data[i].user_count < 3){
             smallIcon.style.color = "#4DDD6F";
@@ -183,11 +187,17 @@ function initBo(){
           iconCont.appendChild(smallIcon);
 
           parent.appendChild(roomItem);
+
+
+
+          roomList.push(data[i].roomname);
         }
     }
 //    debugger;
 
     try{
+        console.log(data);
+        userArray = new Array();
     //  console.log('try');
     //  console.log('length '+data[0].user_count);
         mySocketID = bo.io.engine.id;
@@ -197,11 +207,16 @@ function initBo(){
         //  console.log('me '+mySocketID);
           if(unknowuser == mySocketID){
             userID = loop;
+            userArray.push(userID);
           //  console.log(userID);
           } else{
+            userArray.push(loop);
             totalPlayer++;
+
           }
         }
+
+        //console.log(data[0].user_count);
     }
     catch(err){
 
@@ -331,16 +346,19 @@ function initCanvas(data, bo){
 
 
   document.addEventListener('keypress', function(e){
-    if(e.keyCode == 115){
+
+    var keyCode = e.keyCode || e.which
+
+    if(keyCode == 115){
       mycan.updatePos('left');
     }
-    else if(e.keyCode == 122){
+    else if(keyCode == 122){
       mycan.updatePos('forward');
     }
-    else if(e.keyCode == 113){
+    else if(keyCode == 113){
       mycan.updatePos('backward');
     }
-    else if(e.keyCode == 100){
+    else if(keyCode == 100){
       mycan.updatePos('right');
     }
 
@@ -401,15 +419,32 @@ function _func_(can, bo){
   }
 
   this.setSlaveUser = function(){
-    console.log('total '+totalPlayer);
-    for(var user = 0 ; user < totalPlayer; user++){
-      console.log('index usr '+user);
-      if(user == 1){
-        userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 5, left: 5 , hasControls : false, hasBorders : false});
-        can.add(userTwo);
+
+    for(var user = 0 ; user < userArray.length; user++){
+
+      if(userArray[user] != userID){
+
+        if(user == 0){
+          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 10, left: 5 , hasControls : false, hasBorders : false});
+          console.log('user 0 created');
+          can.add(userOne);
+        }
+        if(user == 1){
+          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 20, left: 20 , hasControls : false, hasBorders : false});
+          console.log('user 1 created');
+          can.add(userTwo);
+        }
+        else if(user == 2){
+          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 10, left: 10, hasControls: false, hasBorders: false});
+          console.log('user 2 created');
+          can.add(userThree);
+        }
+        else if(user == 3){
+          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 20, left: 10, hasControls: false, hasBorders: false});
+          can.add(userFour);
+        }
       }
-
-
+    //  console.log('index usr '+user);
     }
 
 
@@ -452,8 +487,8 @@ function _func_(can, bo){
           can.renderAll();
         }
         else{
-          otherUserPos = new Array(totalPlayer);
-          console.log('user id '+userID);
+          console.log(totalPlayer+1);
+          otherUserPos = new Array(totalPlayer+1);
         //  var userPos = {posX: us.left, posY : us.top};
           otherUserPos[userID] = {posX: us.left, posY : us.top};
       //    console.log(otherUserPos);
@@ -470,18 +505,33 @@ function _func_(can, bo){
 
   this.setPosOfOther = function(data){
     otherUserPos = data;
-    //console.log(data);
+  //  console.log(data);
 
-    console.log(data.userPos);
+  //  console.log(data.userPos);
 
     for(var u = 0 ; u < data.userPos.length; u++){
-      console.log(u);
-      if(u != userID){
-        if(u == 0){
-          userTwo.set({left: data[u].x, top: data[u].y});
-        }
-      }
 
+      if(u != userID){
+
+
+        if(data.userPos[u] != null){
+          if(u == 0){
+            userOne.set({left: data.userPos[u].posX, top: data.userPos[u].posY});
+          }
+          else if(u == 1){
+            userTwo.set({left: data.userPos[u].posX, top: data.userPos[u].posY});
+          }
+          else if(u == 2){
+            userThree.set({left: data.userPos[u].posX, top: data.userPos[u].posY});
+          }
+          else if(u == 3){
+            userFour.set({left: data.userPos[u].posX, top: data.userPos[u].posY});
+          }
+        }
+        //  console.log(u);
+          //console.log(data[1]);
+
+      }
     }
 //    us.set({left: x, top: y});
     can.renderAll();

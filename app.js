@@ -177,21 +177,44 @@ app.get('/home' ,function(req, res){
       received = 0;
       socket.join(room.roomName);
       for(var i =0; i < room.userList.length; i++){
+
         io.to(room.userList[i].socketID).emit('join',{roomname : room.roomName, emiterUser : socket.id});
       }
-
       answer = room.userList.length+1;
     });
 
     socket.on('joinRoom', function(room){
+      received++;
       if(room.ref != "refuse"){
         socket.join(room.roomname);
 
         io.in(room.roomname).clients(function(error, clients){
-            console.log(clients);
-            roomList.push({roomname : room.roomname, user_count : clients.length, alluser : clients});
-            io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
-            io.sockets.emit('getRoom', roomList);
+
+
+            // check if the room already exist in the array
+
+            if(roomList.length == 0){
+              roomList.push({roomname : room.roomname, user_count : clients.length, alluser : clients});
+            }
+
+
+
+            for(var i = 0 ; i < roomList.length; i++){
+              if(roomList[i].roomname == room.roomname){
+                roomList[i].user_count = clients.length;
+                roomList[i].alluser = clients;
+              }
+              else{
+                roomList.push({roomname : room.roomname, user_count : clients.length, alluser : clients});
+              }
+            }
+
+            if(answer == clients.length){
+              io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
+              io.sockets.emit('getRoom', roomList);
+            }
+
+
         });
 
         io.sockets.in(room.roomname).emit('welcome', 'hey');
