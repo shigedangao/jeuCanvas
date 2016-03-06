@@ -55,7 +55,6 @@ function initBo(){
   });
 
   bo.on('welcome', function(data){
-    console.log('fired');
     document.getElementById('rr').style.opacity = 0;
     document.getElementById('createRoom').style.opacity = 0;
     setTimeout(function(){
@@ -66,7 +65,6 @@ function initBo(){
 
   bo.on('getFriend', function(friendList){
     roomList = new Array();
-    console.log(friendList);
 
     var count = 0;
     var parent = document.getElementById('people');
@@ -154,10 +152,10 @@ function initBo(){
         parent.removeChild(parent.firstChild);
     }
 
-    console.log(data.length);
+
 
     for(var i = 0 ; i < data.length; i++){
-      console.log('fired');
+
       //console.log(roomList);
       var roomItem = document.createElement('DIV');
           roomName = document.createElement('P'),
@@ -196,7 +194,7 @@ function initBo(){
 //    debugger;
 
     try{
-        console.log(data);
+
         userArray = new Array();
     //  console.log('try');
     //  console.log('length '+data[0].user_count);
@@ -279,7 +277,7 @@ function addUserToRoom(){
 
   document.getElementsByClassName('innerOcc')[this.getAttribute('data-index')].style.backgroundColor = "#E7BD59";
 
-  console.log(userForRoom);
+
 }
 
 function createRoom(io){
@@ -333,9 +331,8 @@ function resetFriend(){
 }
 
 function initCanvas(data, bo){
-
-  canvas.width = window.innerWidth - 200;
-  canvas.height= window.innerHeight - 65;
+  canvas.width = window.innerWidth - 450;
+  canvas.height= window.innerHeight - 55;
 
   can = new fabric.Canvas('canvas');
 
@@ -368,53 +365,49 @@ function initCanvas(data, bo){
 }
 
 
-
-/* apple device */
-
-function backingScale(context) {
-    if ('devicePixelRatio' in window) {
-        if (window.devicePixelRatio > 1) {
-            return window.devicePixelRatio;
-        }
-    }
-    return 1;
-}
-
 function _func_(can, bo){
   var bo = bo;
   this.can = can;
   var us;
 
   this.generateCell = function(can, data){
-    var nbTale = canvas.width / 40;
-    var hgTale = canvas.height / 40;
-    var dim = Math.floor(canvas.width/20);
+    var nbTale = canvas.width / 30;
+    var hgTale = canvas.height / 50;
+    var dim = Math.floor(canvas.width/30);
 
     for(var i = 0 ; i < data.length; i++){
       var x = (i%20)*dim;
       var y = Math.floor(i/20)*dim;
 
       if(data[i]["N"]<0){
-        can.add(new fabric.Line([x,y,x+dim,y], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+        var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false});
+        line.setShadow({ color: '#2b2823',
+                          blur: 0,
+                          offsetX: 0,
+                          offsetY: 6,
+                          opacity: 1,
+                          fillShadow: true,
+                          strokeShadow: true });
+        can.add(line);
       }
 
       if(data[i]["S"]<0){
-        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
       }
 
       if(data[i]["E"]<0){
-        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
       }
 
       if(data[i]["O"]<0){
-        can.add(new fabric.Line([x,y,x,y+dim], {fill: 'red', stroke : 'red', strokeWidth : 1, selectable : false}));
+        can.add(new fabric.Line([x,y,x,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
       }
     }
   };
 
   this.setUser = function(){
 
-    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 5, left: 5 , hasControls : false, hasBorders : false});
+    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 30, left: 30 , hasControls : false, hasBorders : false});
     can.add(us);
   }
 
@@ -425,22 +418,19 @@ function _func_(can, bo){
       if(userArray[user] != userID){
 
         if(user == 0){
-          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 10, left: 5 , hasControls : false, hasBorders : false});
-          console.log('user 0 created');
+          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 30, left: 30 , hasControls : false, hasBorders : false});
           can.add(userOne);
         }
         if(user == 1){
-          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 20, left: 20 , hasControls : false, hasBorders : false});
-          console.log('user 1 created');
+          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 30, left: 30 , hasControls : false, hasBorders : false});
           can.add(userTwo);
         }
         else if(user == 2){
-          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 10, left: 10, hasControls: false, hasBorders: false});
-          console.log('user 2 created');
+          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 30, left: 30, hasControls: false, hasBorders: false});
           can.add(userThree);
         }
         else if(user == 3){
-          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 20, left: 10, hasControls: false, hasBorders: false});
+          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 30, left: 30, hasControls: false, hasBorders: false});
           can.add(userFour);
         }
       }

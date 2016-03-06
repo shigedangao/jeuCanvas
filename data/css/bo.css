@@ -162,7 +162,7 @@ body{
 
 /* --- list ---- */
 
-.list{
+.list, .chat{
   width: 200px;
   height: calc(100% - 65px);
   position: absolute;
@@ -170,6 +170,12 @@ body{
   top: 65px;
   background-color: #d9d6d0;
   padding-left: 20px;
+}
+
+.chat{
+  right: inherit;
+  left: 0;
+  background-color: #73737E;
 }
 
 .room-item, .person-item{
@@ -342,7 +348,8 @@ h2{
 
 #canvas{
   position: relative;
- top: 65px !important;
+  top: 85px !important;
+  left: 200px !important;
 }
 
 /* game */
