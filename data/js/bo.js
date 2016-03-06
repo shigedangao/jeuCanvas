@@ -13,7 +13,9 @@ var mycan;
 var can;
 var mySocketID;
 var totalPlayer = 0;
+var playerSideBar;
 var userArray = new Array();
+var pl;
 
 
 var otherUserPos = new Array();
@@ -152,44 +154,47 @@ function initBo(){
         parent.removeChild(parent.firstChild);
     }
 
+    roomList = [];
+
 
 
     for(var i = 0 ; i < data.length; i++){
-
       //console.log(roomList);
-      var roomItem = document.createElement('DIV');
-          roomName = document.createElement('P'),
-          iconCont = document.createElement('icon_place'),
-          smallIcon = document.createElement('smaller_icon');
+      if(data[i].roomname){
+        var roomItem = document.createElement('DIV');
+            roomName = document.createElement('P'),
+            iconCont = document.createElement('icon_place'),
+            smallIcon = document.createElement('smaller_icon');
 
-        if(roomList[i] != data[i].roomname){
-          roomItem.className = "room-item";
-          roomName.innerHTML = data[i].roomname+" "+data[i].user_count+" / 4";
+          if(roomList[i] != data[i].roomname){
+            roomItem.className = "room-item";
+            roomName.innerHTML = data[i].roomname+" "+data[i].user_count+" / 4";
 
-          iconCont.className = "icon_place";
-          smallIcon.className = "smaller_icon";
+            iconCont.className = "icon_place";
+            smallIcon.className = "smaller_icon";
 
 
-          if(data[i].user_count < 3){
-            smallIcon.style.color = "#4DDD6F";
+            if(data[i].user_count < 3){
+              smallIcon.style.color = "#4DDD6F";
+            }
+            else if(data[i].user_count == 3){
+              smallIcon.style.color = "#E7BD59";
+            }
+            else{
+              smallIcon.style.color = "#DB7654";
+            }
+
+            roomItem.appendChild(roomName);
+            roomItem.appendChild(iconCont);
+            iconCont.appendChild(smallIcon);
+
+            parent.appendChild(roomItem);
+
+
+
+            roomList.push(data[i].roomname);
           }
-          else if(data[i].user_count == 3){
-            smallIcon.style.color = "#E7BD59";
-          }
-          else{
-            smallIcon.style.color = "#DB7654";
-          }
-
-          roomItem.appendChild(roomName);
-          roomItem.appendChild(iconCont);
-          iconCont.appendChild(smallIcon);
-
-          parent.appendChild(roomItem);
-
-
-
-          roomList.push(data[i].roomname);
-        }
+      }
     }
 //    debugger;
 
@@ -229,13 +234,21 @@ function initBo(){
 
 
     initCanvas(data, bo);
-
   });
 
 
   bo.on('message', function(data){
     mycan.setPosOfOther(data);
   });
+
+  bo.on('noMoreUsr', function(){
+      swal({   title: "A user has quit the party. This room will be destroy.", type: "warning",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
+        bo.emit('destroyRoom', userRoom);
+        mycan.clearCanvas();
+        resetEl();
+        playerSideBar.style.left = "-170px";
+      });
+  })
 
   /* ------------------- DOM LISTENER ------------------- */
 
@@ -248,7 +261,21 @@ function initBo(){
   document.getElementById('createRoom').addEventListener('click', function(){
     createRoom(bo);
   } , false);
+
+
+  document.getElementById('quit').addEventListener('click', function(){
+    mycan.clearCanvas();
+    resetEl();
+    bo.emit('quitRoom', userRoom);
+    playerSideBar.style.left = "-170px";
+  }, false);
+
+  playerSideBar = document.getElementById('side_user');
 };
+
+
+document.getElementById('rot').addEventListener('click', function(){
+});
 
 function addUserToRoom(){
   var toPush = true;
@@ -340,6 +367,10 @@ function initCanvas(data, bo){
   mycan.generateCell(can, data);
   mycan.setUser(can);
   mycan.setSlaveUser();
+  mycan.setPlace();
+
+  // display the sidebar.
+  playerSideBar.style.left = '0px';
 
 
   document.addEventListener('keypress', function(e){
@@ -370,21 +401,29 @@ function _func_(can, bo){
   this.can = can;
   var us;
 
+
+  var target,
+      hgTarg;
+
   this.generateCell = function(can, data){
     var nbTale = canvas.width / 30;
-    var hgTale = canvas.height / 50;
-    var dim = Math.floor(canvas.width/30);
+    var hgTale = canvas.height / 35;
+
+     target = nbTale * 10;
+     hgTarg = hgTale * 15;
+    var dim = Math.floor(canvas.width/29);
+    //console.log(data);
 
     for(var i = 0 ; i < data.length; i++){
-      var x = (i%20)*dim;
+      var x = Math.floor(i%20)*dim;
       var y = Math.floor(i/20)*dim;
 
       if(data[i]["N"]<0){
-        var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false});
+        var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false});
         line.setShadow({ color: '#2b2823',
                           blur: 0,
                           offsetX: 0,
-                          offsetY: 6,
+                          offsetY: 4,
                           opacity: 1,
                           fillShadow: true,
                           strokeShadow: true });
@@ -392,22 +431,22 @@ function _func_(can, bo){
       }
 
       if(data[i]["S"]<0){
-        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
+        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
       }
 
       if(data[i]["E"]<0){
-        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
+        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
       }
 
       if(data[i]["O"]<0){
-        can.add(new fabric.Line([x,y,x,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 6, selectable : false}));
+        can.add(new fabric.Line([x,y,x,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
       }
     }
+
   };
 
   this.setUser = function(){
-
-    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 30, left: 30 , hasControls : false, hasBorders : false});
+    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 15, left: 10 , hasControls : false, hasBorders : false});
     can.add(us);
   }
 
@@ -418,19 +457,19 @@ function _func_(can, bo){
       if(userArray[user] != userID){
 
         if(user == 0){
-          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 30, left: 30 , hasControls : false, hasBorders : false});
+          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 15, left: 10 , hasControls : false, hasBorders : false});
           can.add(userOne);
         }
         if(user == 1){
-          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 30, left: 30 , hasControls : false, hasBorders : false});
+          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 15, left: 10 , hasControls : false, hasBorders : false});
           can.add(userTwo);
         }
         else if(user == 2){
-          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 30, left: 30, hasControls: false, hasBorders: false});
+          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 15, left: 10, hasControls: false, hasBorders: false});
           can.add(userThree);
         }
         else if(user == 3){
-          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 30, left: 30, hasControls: false, hasBorders: false});
+          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 15, left: 10, hasControls: false, hasBorders: false});
           can.add(userFour);
         }
       }
@@ -519,11 +558,28 @@ function _func_(can, bo){
           }
         }
         //  console.log(u);
-          //console.log(data[1]);
+        //console.log(data[1]);
 
       }
     }
 //    us.set({left: x, top: y});
     can.renderAll();
+  },
+
+  this.clearCanvas = function(){
+    can.clear();
+  },
+
+
+  this.setPlace = function(){
+    pl = new fabric.Rect({left: target, top: hgTarg, fill: '#D9D6D0', width: 20, height: 20});
+    can.add(pl);
   }
+
+  this.animatePlace = function(){
+  //  pl.animate('angle', '360', )
+  }
+
+
+
 }

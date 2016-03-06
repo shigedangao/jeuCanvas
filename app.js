@@ -267,9 +267,36 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('move', function(data){
-      console.log(data);
-      console.log('move received');
       socket.broadcast.to(data.roomName).send({userPos : data.userPos});
     });
+
+    socket.on('quitRoom', function(data){
+      socket.leave(data);
+      // check the number of user in the room
+      io.in(data).clients(function(error, clients){
+        console.log(clients);
+        // if there's only one use left, prevent the user that the room will be close.
+        if(clients.length == 1){
+          io.in(data).emit('noMoreUsr');
+        }
+      });
+    })
+
+    socket.on('destroyRoom', function(data){
+      socket.leave(data);
+
+      io.in(data).clients(function(error, clients){
+        console.log(clients);
+        // if there's only one use left, prevent the user that the room will be close.
+      });
+
+      for(var r = 0; r < roomList.length; r++){
+          if(roomList[r].roomname == data){
+                roomList[r] = {};
+          }
+      }
+      io.sockets.emit('getRoom', roomList);
+    })
+
   });
 });

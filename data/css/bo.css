@@ -3,6 +3,8 @@ body{
   padding: 0;
   font-family: 'helvetica';
   font-weight: lighter;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar_container{
@@ -174,8 +176,12 @@ body{
 
 .chat{
   right: inherit;
-  left: 0;
-  background-color: #73737E;
+  left: -170px;
+  background-color: #D9D6D0;
+  width: 150px;
+  transition: all ease 1s;
+  -webkit-transition: all ease 1s;
+  -moz-transition: all ease 1s;
 }
 
 .room-item, .person-item{
@@ -382,4 +388,47 @@ td{
 
 tr{
   display: flex;
+}
+
+#quit{
+  width: 100px;
+  border:1px solid white;
+  padding: 5px 5px 5px 5px;
+  margin-top: 10px;
+  border-radius: 5px;
+  background-color: #E7BD59;
+}
+
+#quit p{
+  margin-top: 0px;
+  margin-bottom: 0px;
+  text-align: center;
+}
+
+.wrap_action{
+  display: flex;
+  display: -webkit-flex;
+  flex-wrap: wrap;
+}
+
+.user_rotate{
+  width: 40px;
+  height: 40px;
+  background-color: #bfbbb2;
+  border-radius: 50%;
+  position: relative;
+}
+
+.user_rotate i{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 15px;
+  height: 15px;
 }
