@@ -16,6 +16,7 @@ var totalPlayer = 0;
 var playerSideBar;
 var userArray = new Array();
 var pl;
+var username;
 
 
 var otherUserPos = new Array();
@@ -31,7 +32,7 @@ var userOne,
 var userID ;
 
 function initBo(){
-  var username = '';
+  username = '';
   var isAuth = false;
 
   var bo = io();
@@ -250,6 +251,17 @@ function initBo(){
       });
   })
 
+  bo.on('loose', function(data){
+    swal({title: "You have lost :(. The winner is "+data ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
+      mycan.clearCanvas();
+      bo.emit('quitRoom', userRoom);
+      resetEl();
+      playerSideBar.style.left = "-170px";
+    });
+
+
+  })
+
   /* ------------------- DOM LISTENER ------------------- */
 
   document.getElementById('disc').addEventListener('click', function(){
@@ -270,12 +282,14 @@ function initBo(){
     playerSideBar.style.left = "-170px";
   }, false);
 
+  document.getElementById('rot').addEventListener('click', function(){
+  });
+
+
   playerSideBar = document.getElementById('side_user');
 };
 
 
-document.getElementById('rot').addEventListener('click', function(){
-});
 
 function addUserToRoom(){
   var toPush = true;
@@ -365,9 +379,10 @@ function initCanvas(data, bo){
 
   mycan = new _func_(can, bo);
   mycan.generateCell(can, data);
+  mycan.setPlace();
   mycan.setUser(can);
   mycan.setSlaveUser();
-  mycan.setPlace();
+  mycan.an();
 
   // display the sidebar.
   playerSideBar.style.left = '0px';
@@ -530,6 +545,18 @@ function _func_(can, bo){
         colCount++;
       }
     }
+
+    // check intersection with the target
+    if(us.intersectsWithObject(pl)){
+      console.log(username);
+      bo.emit('winner', {winner : username, roomname : userRoom});
+      swal({title: "Oh sir you won !!" ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
+        mycan.clearCanvas();
+        bo.emit('destroyRoom', userRoom);
+        resetEl();
+        playerSideBar.style.left = "-170px";
+      });
+    }
   }
 
   this.setPosOfOther = function(data){
@@ -572,14 +599,18 @@ function _func_(can, bo){
 
 
   this.setPlace = function(){
-    pl = new fabric.Rect({left: target, top: hgTarg, fill: '#D9D6D0', width: 20, height: 20});
+    // left : target , top : hgTarg
+    pl = new fabric.Rect({left: target, top: hgTarg, fill: '#D9D6D0', width: 20, height: 20, hasBorders : false, hasControls : false, selectable: false, originX : 'center', originY : 'center'});
     can.add(pl);
   }
 
-  this.animatePlace = function(){
-  //  pl.animate('angle', '360', )
+  this.an = function(){
+    pl.animate('angle', '+=20', {
+      duration: 3000,
+      onChange: can.renderAll.bind(can),
+      onComplete : function(){
+        mycan.an();
+      }
+    });
   }
-
-
-
 }

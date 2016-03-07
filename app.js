@@ -298,5 +298,43 @@ app.get('/home' ,function(req, res){
       io.sockets.emit('getRoom', roomList);
     })
 
+
+    socket.on('winner', function(data){
+      console.log('fired');
+      socket.broadcast.to(data.roomname).emit('loose', data.winner);
+
+
+      var usr = querystring.stringify({
+        'username' : data.winner,
+      });
+
+      var reqCount = {
+          hostname: 'localhost',
+          port: 8888,
+          path: '/LabyM/php/count.php',
+          method: 'POST',
+          headers: {
+             'Content-Type': 'application/x-www-form-urlencoded',
+             'Content-Length': usr.length
+          }
+        }
+
+        var req = http.request(reqCount, (result) => {
+            result.setEncoding('utf8');
+        	result.on('data', (res) =>{
+              console.log(res);
+        			//   io.sockets.in(room.roomname).emit('initCount',res);
+        	});
+
+        	req.on('error', (e) => {
+        			  console.log(decoded);
+        	})
+
+        	req.write(usr);
+          req.end();
+
+        });
+    });
+
   });
 });
