@@ -6,9 +6,9 @@ $mysqli = new mysqli('localhost',$user,$password, 'laby') or die("erreur de conn
 if($mysqli->connect_errno){
   echo 'error';
 } else{
-  $query = $mysqli->query("UPDATE laby SET win_count = win_count + 1 WHERE login='".$_POST["username"]."'");
-  $row = $query -> num_rows;
-  if($row) // Vérification du mot de passe contenu dans la BD
+  $query = $mysqli->query("UPDATE user SET win_count = win_count + 1 WHERE login='".$_POST["username"]."'");
+
+  if($query) // Vérification du mot de passe contenu dans la BD
       {
       echo 'success';
 	//  header('Location: index.html')

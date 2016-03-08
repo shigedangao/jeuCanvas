@@ -258,7 +258,13 @@ function initBo(){
       resetEl();
       playerSideBar.style.left = "-170px";
     });
+  })
 
+  bo.on('error', function(){
+    swal({title: "error while trying to update your score :("+data ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true});
+  })
+
+  bo.on('updateUsr', function(){
 
   })
 
@@ -420,6 +426,7 @@ function _func_(can, bo){
   var target,
       hgTarg;
 
+
   this.generateCell = function(can, data){
     var nbTale = canvas.width / 30;
     var hgTale = canvas.height / 35;
@@ -434,7 +441,7 @@ function _func_(can, bo){
       var y = Math.floor(i/20)*dim;
 
       if(data[i]["N"]<0){
-        var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false});
+        var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false, hasControls : false});
         line.setShadow({ color: '#2b2823',
                           blur: 0,
                           offsetX: 0,
@@ -548,9 +555,8 @@ function _func_(can, bo){
 
     // check intersection with the target
     if(us.intersectsWithObject(pl)){
-      console.log(username);
-      bo.emit('winner', {winner : username, roomname : userRoom});
       swal({title: "Oh sir you won !!" ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
+        bo.emit('winner', {winner : username, roomname : userRoom, sockID : mySocketID});
         mycan.clearCanvas();
         bo.emit('destroyRoom', userRoom);
         resetEl();
@@ -568,8 +574,6 @@ function _func_(can, bo){
     for(var u = 0 ; u < data.userPos.length; u++){
 
       if(u != userID){
-
-
         if(data.userPos[u] != null){
           if(u == 0){
             userOne.set({left: data.userPos[u].posX, top: data.userPos[u].posY});
@@ -600,9 +604,10 @@ function _func_(can, bo){
 
   this.setPlace = function(){
     // left : target , top : hgTarg
-    pl = new fabric.Rect({left: target, top: hgTarg, fill: '#D9D6D0', width: 20, height: 20, hasBorders : false, hasControls : false, selectable: false, originX : 'center', originY : 'center'});
+    pl = new fabric.Rect({left: 50, top: 50, fill: '#D9D6D0', width: 20, height: 20, hasBorders : false, hasControls : false, selectable: false, originX : 'center', originY : 'center'});
     can.add(pl);
   }
+
 
   this.an = function(){
     pl.animate('angle', '+=20', {
@@ -613,4 +618,5 @@ function _func_(can, bo){
       }
     });
   }
+
 }

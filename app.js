@@ -300,13 +300,14 @@ app.get('/home' ,function(req, res){
 
 
     socket.on('winner', function(data){
-      console.log('fired');
+      console.log('ok');
       socket.broadcast.to(data.roomname).emit('loose', data.winner);
 
 
       var usr = querystring.stringify({
         'username' : data.winner,
       });
+
 
       var reqCount = {
           hostname: 'localhost',
@@ -320,20 +321,26 @@ app.get('/home' ,function(req, res){
         }
 
         var req = http.request(reqCount, (result) => {
-            result.setEncoding('utf8');
+          console.log('send');
+          result.setEncoding('utf8');
         	result.on('data', (res) =>{
               console.log(res);
-        			//   io.sockets.in(room.roomname).emit('initCount',res);
+        		  if(res == "success"){
+                io.to('/#'+data.sockID).emit('updateUsr');
+              }
+              else{
+                io.to('/#'+data.sockID).emit('error');
+              }
         	});
-
-        	req.on('error', (e) => {
-        			  console.log(decoded);
-        	})
-
-        	req.write(usr);
-          req.end();
-
         });
+
+
+        req.on('error', (e) => {
+              console.log(e);
+        })
+
+        req.write(usr);
+        req.end();
     });
 
   });
