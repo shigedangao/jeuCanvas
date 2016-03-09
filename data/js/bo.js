@@ -17,6 +17,8 @@ var playerSideBar;
 var userArray = new Array();
 var pl;
 var username;
+var rm = false;
+var already = false;
 
 
 var otherUserPos = new Array();
@@ -119,6 +121,8 @@ function initBo(){
   });
 
   bo.on('saveRoom', function(data){
+    already = true;
+    console.log('once');
     userRoom = data;
     bo.emit('setGame', userRoom);
   });
@@ -144,6 +148,7 @@ function initBo(){
   });
 
   bo.on('getRoom', function(data){
+    console.log('room fired');
   //  console.log('get room');
   //  console.log(data);
   //  bo.removeListener('getRoom');
@@ -196,46 +201,53 @@ function initBo(){
             roomList.push(data[i].roomname);
           }
       }
+
+      try{
+
+          userArray = new Array();
+      //  console.log('try');
+      //  console.log('length '+data[0].user_count);
+          mySocketID = bo.io.engine.id;
+          for(var loop = 0; loop < data[i].user_count; loop++){
+            var unknowuser = data[i].alluser[loop].split('/#')[1];
+          //  console.log('unknow '+unknowuser);
+          //  console.log('me '+mySocketID);
+            if(unknowuser == mySocketID){
+              userID = loop;
+              userArray.push(userID);
+            //  console.log(userID);
+            } else{
+              userArray.push(loop);
+              totalPlayer++;
+
+            }
+          }
+
+          debugger;
+
+          //console.log(data[0].user_count);
+      }
+      catch(err){
+
+      }
     }
 //    debugger;
-
-    try{
-
-        userArray = new Array();
-    //  console.log('try');
-    //  console.log('length '+data[0].user_count);
-        mySocketID = bo.io.engine.id;
-        for(var loop = 0; loop < data[0].user_count; loop++){
-          var unknowuser = data[0].alluser[loop].split('/#')[1];
-        //  console.log('unknow '+unknowuser);
-        //  console.log('me '+mySocketID);
-          if(unknowuser == mySocketID){
-            userID = loop;
-            userArray.push(userID);
-          //  console.log(userID);
-          } else{
-            userArray.push(loop);
-            totalPlayer++;
-
-          }
-        }
-
-        //console.log(data[0].user_count);
-    }
-    catch(err){
-
-    }
-
-
   });
 
-  bo.on('initGame', function(data){
+  bo.on('initGame', loadGame);
+
+  function loadGame(data){
     data = JSON.parse(data);
-    bo.removeListener('initGame');
+  //  bo.removeListener('initGame');
+
+    if(already){
+      initCanvas(data, bo);
+      already = false;
+    }
 
 
-    initCanvas(data, bo);
-  });
+    //rm = true;
+  }
 
 
   bo.on('message', function(data){
@@ -244,8 +256,8 @@ function initBo(){
 
   bo.on('noMoreUsr', function(){
       swal({   title: "A user has quit the party. This room will be destroy.", type: "warning",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
-        bo.emit('destroyRoom', userRoom);
         mycan.clearCanvas();
+        bo.emit('destroyRoom', userRoom);
         resetEl();
         playerSideBar.style.left = "-170px";
       });
@@ -378,6 +390,7 @@ function resetFriend(){
 }
 
 function initCanvas(data, bo){
+  console.log('haha');
   canvas.width = window.innerWidth - 450;
   canvas.height= window.innerHeight - 55;
 
@@ -421,19 +434,19 @@ function _func_(can, bo){
   var bo = bo;
   this.can = can;
   var us;
+  var dim = Math.floor(canvas.width/29);
+  var nbTale = canvas.width / 30;
+  var hgTale = canvas.height / 35;
+
+   var target = nbTale * 10;
+   var hgTarg = hgTale * 15;
 
 
-  var target,
-      hgTarg;
 
 
   this.generateCell = function(can, data){
-    var nbTale = canvas.width / 30;
-    var hgTale = canvas.height / 35;
 
-     target = nbTale * 10;
-     hgTarg = hgTale * 15;
-    var dim = Math.floor(canvas.width/29);
+
     //console.log(data);
 
     for(var i = 0 ; i < data.length; i++){
@@ -442,13 +455,6 @@ function _func_(can, bo){
 
       if(data[i]["N"]<0){
         var line = new fabric.Line([x,y,x+dim,y], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false, hasControls : false});
-        line.setShadow({ color: '#2b2823',
-                          blur: 0,
-                          offsetX: 0,
-                          offsetY: 4,
-                          opacity: 1,
-                          fillShadow: true,
-                          strokeShadow: true });
         can.add(line);
       }
 
@@ -473,7 +479,7 @@ function _func_(can, bo){
   }
 
   this.setSlaveUser = function(){
-
+    console.log(userArray);
     for(var user = 0 ; user < userArray.length; user++){
 
       if(userArray[user] != userID){
@@ -556,8 +562,8 @@ function _func_(can, bo){
     // check intersection with the target
     if(us.intersectsWithObject(pl)){
       swal({title: "Oh sir you won !!" ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true}, function(isConfirm){
-        bo.emit('winner', {winner : username, roomname : userRoom, sockID : mySocketID});
         mycan.clearCanvas();
+        bo.emit('winner', {winner : username, roomname : userRoom, sockID : mySocketID});
         bo.emit('destroyRoom', userRoom);
         resetEl();
         playerSideBar.style.left = "-170px";
@@ -599,6 +605,7 @@ function _func_(can, bo){
 
   this.clearCanvas = function(){
     can.clear();
+    mycan = 0;
   },
 
 
@@ -614,7 +621,13 @@ function _func_(can, bo){
       duration: 3000,
       onChange: can.renderAll.bind(can),
       onComplete : function(){
-        mycan.an();
+        try{
+          mycan.an();
+        }
+        catch(err){
+          console.log('function terminated');
+        }
+
       }
     });
   }

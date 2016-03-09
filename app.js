@@ -23,6 +23,8 @@ var user = [];
 var roomList = [];
 var answer = 0;
 var received = 0;
+var isAlreaySend = false;
+
 
 // global socket;
 
@@ -174,13 +176,14 @@ app.get('/home' ,function(req, res){
     });
 
     socket.on('createRoom', function(room){
+      console.log('creer room');
       received = 0;
       socket.join(room.roomName);
       for(var i =0; i < room.userList.length; i++){
-
         io.to(room.userList[i].socketID).emit('join',{roomname : room.roomName, emiterUser : socket.id});
       }
       answer = room.userList.length+1;
+      isAlreaySend = false;
     });
 
     socket.on('joinRoom', function(room){
@@ -197,8 +200,6 @@ app.get('/home' ,function(req, res){
               roomList.push({roomname : room.roomname, user_count : clients.length, alluser : clients});
             }
 
-
-
             for(var i = 0 ; i < roomList.length; i++){
               if(roomList[i].roomname == room.roomname){
                 roomList[i].user_count = clients.length;
@@ -209,8 +210,12 @@ app.get('/home' ,function(req, res){
               }
             }
 
-            if(answer == clients.length){
-              io.sockets.in(room.roomname).emit('saveRoom', room.roomname);
+            if(answer == clients.length && !isAlreaySend){
+              for(var u = 0; u < clients.length; u++){
+                io.to(clients[u]).emit('saveRoom', room.roomname);
+              }
+              isAlreaySend = true;
+            //  io.sockets.in(room.roomname).emit();
               io.sockets.emit('getRoom', roomList);
             }
 
@@ -237,6 +242,7 @@ app.get('/home' ,function(req, res){
     /* ---------------------- room property ---------------------- */
 
     socket.on('setGame', function(roomname){
+      console.log('pppp');
       var reqSub = {
         hostname: 'localhost',
         port: 8888,
@@ -250,7 +256,13 @@ app.get('/home' ,function(req, res){
       var request = http.request(reqSub, (laby) => {
         laby.setEncoding('utf8');
         laby.on('data', (res) => {
-          io.sockets.in(roomname).emit('initGame', res);
+
+          io.in(roomname).clients(function(error, clients){
+            for(var i = 0 ; i < clients.length; i++){
+              io.to(clients[i]).emit('initGame', res);
+            }
+          })
+        //  io.sockets.in(roomname).emit('initGame', res);
         });
 
         laby.on('end', (res) => {
