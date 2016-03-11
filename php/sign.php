@@ -3,7 +3,6 @@
   $serverName = 'localhost';
   $userName = 'root';
   $password = 'root';
-  $data;
 
   if(isset($_POST["login"]) && isset($_POST["password"]) && isset($_POST["mail"])){
       // make connexion
