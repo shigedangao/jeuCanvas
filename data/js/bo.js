@@ -19,6 +19,8 @@ var pl;
 var username;
 var rm = false;
 var already = false;
+var collide = 0;
+var saveCol = 0;
 
 
 var otherUserPos = new Array();
@@ -52,6 +54,7 @@ function initBo(){
     bo.removeListener('getToken');
     document.getElementById('user').innerHTML = data.user;
     username = data.user;
+    getScoreAj();
     bo.emit('setUser', {username: username});
   });
 
@@ -276,8 +279,17 @@ function initBo(){
     swal({title: "error while trying to update your score :("+data ,type: "info",   showCancelButton: false,   confirmButtonColor: "#DD6B55",   confirmButtonText: "Close",   closeOnConfirm: true});
   })
 
-  bo.on('updateUsr', function(){
+  bo.on('updateUsr', function(data){
+    document.getElementById('rank').innerHTML = data;
+  })
 
+
+  bo.on('goCrazy', function(data){
+    if(mycan){
+      mycan.crazy();
+      saveCol = data;
+      collide = data;
+    }
   })
 
   /* ------------------- DOM LISTENER ------------------- */
@@ -300,11 +312,9 @@ function initBo(){
     playerSideBar.style.left = "-170px";
   }, false);
 
-  document.getElementById('rot').addEventListener('click', function(){
-  });
-
-
   playerSideBar = document.getElementById('side_user');
+
+
 };
 
 
@@ -391,10 +401,16 @@ function resetFriend(){
 
 function initCanvas(data, bo){
   console.log('haha');
-  canvas.width = window.innerWidth - 450;
-  canvas.height= window.innerHeight - 55;
+//  canvas.width = window.innerWidth - 450;
+//  canvas.height= window.innerHeight - 55;
 
   can = new fabric.Canvas('canvas');
+  can.setWidth(window.innerWidth - 450);
+  can.setHeight(window.innerHeight - 60);
+
+
+  console.log(can.height);
+
 
   mycan = new _func_(can, bo);
   mycan.generateCell(can, data);
@@ -434,15 +450,13 @@ function _func_(can, bo){
   var bo = bo;
   this.can = can;
   var us;
-  var dim = Math.floor(canvas.width/29);
-  var nbTale = canvas.width / 30;
-  var hgTale = canvas.height / 35;
 
-   var target = nbTale * 10;
-   var hgTarg = hgTale * 15;
+  var target = (can.width / 30) * 10;
+  var hgTarg = (can.height / 35) * 15;
 
+  var canHeight = can.height-20;
 
-
+  var dim = Math.floor(can.height/20);
 
   this.generateCell = function(can, data){
 
@@ -450,7 +464,7 @@ function _func_(can, bo){
     //console.log(data);
 
     for(var i = 0 ; i < data.length; i++){
-      var x = Math.floor(i%20)*dim;
+      var x = (i%20)*dim;
       var y = Math.floor(i/20)*dim;
 
       if(data[i]["N"]<0){
@@ -459,22 +473,22 @@ function _func_(can, bo){
       }
 
       if(data[i]["S"]<0){
-        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
+        can.add(new fabric.Line([x,y+dim,x+dim,y+dim], {fill: '#D5B89E', stroke : '#D5B89E', strokeWidth : 4, selectable : false}));
       }
 
       if(data[i]["E"]<0){
-        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
+        can.add(new fabric.Line([x+dim,y,x+dim,y+dim], {fill: '#D9D6D0', stroke : '#D9D6D0', strokeWidth : 4, selectable : false}));
       }
 
       if(data[i]["O"]<0){
-        can.add(new fabric.Line([x,y,x,y+dim], {fill: '#4D4941', stroke : '#4D4941', strokeWidth : 4, selectable : false}));
+        can.add(new fabric.Line([x,y,x,y+dim], {fill: '#E7BD59', stroke : '#E7BD59', strokeWidth : 4, selectable : false}));
       }
     }
 
   };
 
   this.setUser = function(){
-    us = new fabric.Circle({ radius: 5, fill: '#f55', top: 15, left: 10 , hasControls : false, hasBorders : false});
+    us = new fabric.Circle({radius: 5, fill: '#f55', top: 15, left: 10 , hasControls : false, hasBorders : false});
     can.add(us);
   }
 
@@ -485,19 +499,19 @@ function _func_(can, bo){
       if(userArray[user] != userID){
 
         if(user == 0){
-          userOne = new fabric.Circle({radius : 5,fill: '#F28B93', top: 15, left: 10 , hasControls : false, hasBorders : false});
+          userOne = new fabric.Circle({radius: 5,fill: '#F28B93', top: 20, left: 20 , hasControls : false, hasBorders : false});
           can.add(userOne);
         }
         if(user == 1){
-          userTwo = new fabric.Circle({radius : 5,fill: '#000000', top: 15, left: 10 , hasControls : false, hasBorders : false});
+          userTwo = new fabric.Circle({radius: 5,fill: '#000000', top: 25, left: 20 , hasControls : false, hasBorders : false});
           can.add(userTwo);
         }
         else if(user == 2){
-          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 15, left: 10, hasControls: false, hasBorders: false});
+          userThree = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 30, left: 20, hasControls: false, hasBorders: false});
           can.add(userThree);
         }
         else if(user == 3){
-          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 15, left: 10, hasControls: false, hasBorders: false});
+          userFour = new fabric.Circle({radius: 5, fill: '#EEEEEE', top: 35, left: 20, hasControls: false, hasBorders: false});
           can.add(userFour);
         }
       }
@@ -537,14 +551,20 @@ function _func_(can, bo){
   //  console.log(item);
     for(var i = 0 ; i < item.length; i++){
       if(us.intersectsWithObject(item[i])){
-        if(colCount > 1){
-          console.log('collision');
-          us.set({left: oldPosX, top: oldPosY});
+        if(colCount > 1 || us.left == 0 || us.top == 0 || us.left == canHeight || us.top == canHeight || us.left > canHeight || us.top > canHeight){
+          us.set({left: 15, top: 10});
+
           us.setCoords();
           can.renderAll();
         }
+
+        if(item[i].stroke == "#D9D6D0"){
+              saveCol+=5;
+              collide = saveCol;
+              mycan.crazy();
+              bo.emit('launchCrazy', {n : saveCol, r : userRoom});
+        }
         else{
-          console.log(totalPlayer+1);
           otherUserPos = new Array(totalPlayer+1);
         //  var userPos = {posX: us.left, posY : us.top};
           otherUserPos[userID] = {posX: us.left, posY : us.top};
@@ -611,14 +631,24 @@ function _func_(can, bo){
 
   this.setPlace = function(){
     // left : target , top : hgTarg
-    pl = new fabric.Rect({left: 50, top: 50, fill: '#D9D6D0', width: 20, height: 20, hasBorders : false, hasControls : false, selectable: false, originX : 'center', originY : 'center'});
+    pl = new fabric.Rect({left: target, top: hgTarg, fill: '#253238', width: 30, height: 30, hasBorders : false, hasControls : false, selectable: false, originX : 'center', originY : 'center'});
     can.add(pl);
   }
 
+  this.crazy = function(){
+    pl.animate('left', (target+collide),{
+      duration: 500,
+      onChange: can.renderAll.bind(can),
+      onComplete : function(){
+        collide = -collide;
+        mycan.crazy();
+      }
+    });
+  }
 
   this.an = function(){
     pl.animate('angle', '+=20', {
-      duration: 3000,
+      duration: 2000,
       onChange: can.renderAll.bind(can),
       onComplete : function(){
         try{
@@ -627,9 +657,22 @@ function _func_(can, bo){
         catch(err){
           console.log('function terminated');
         }
-
       }
     });
   }
 
+}
+
+
+function getScoreAj(){
+  var rq = new XMLHttpRequest();
+  var url = "http://localhost:8888/LabyM/php/count.php";
+  rq.open("POST",url,true);
+  rq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  rq.send("username="+username);
+  rq.onreadystatechange = function(){
+    if((rq.readyState==4)&&(rq.status==200)){
+      document.getElementById('rank').innerHTML = rq.responseText;
+    }
+  }
 }

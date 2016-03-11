@@ -1,7 +1,6 @@
 // depedencies
 var express = require('express');
 var file = require('fs');
-var sql = require('mysql');
 var path = require('path');
 var validator = require('validator');
 const crypto = require('crypto');
@@ -310,6 +309,10 @@ app.get('/home' ,function(req, res){
       io.sockets.emit('getRoom', roomList);
     })
 
+    socket.on('launchCrazy', function(data){
+      socket.broadcast.to(data.r).emit('goCrazy',data.n);
+    })
+
 
     socket.on('winner', function(data){
       console.log('ok');
@@ -318,6 +321,7 @@ app.get('/home' ,function(req, res){
 
       var usr = querystring.stringify({
         'username' : data.winner,
+        'type':'setCount'
       });
 
 
@@ -337,15 +341,14 @@ app.get('/home' ,function(req, res){
           result.setEncoding('utf8');
         	result.on('data', (res) =>{
               console.log(res);
-        		  if(res == "success"){
-                io.to('/#'+data.sockID).emit('updateUsr');
+        		  if(res != 'error'){
+                io.to('/#'+data.sockID).emit('updateUsr', res);
               }
               else{
                 io.to('/#'+data.sockID).emit('error');
               }
         	});
         });
-
 
         req.on('error', (e) => {
               console.log(e);
@@ -354,6 +357,5 @@ app.get('/home' ,function(req, res){
         req.write(usr);
         req.end();
     });
-
   });
 });
